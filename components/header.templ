@@ -1,0 +1,98 @@
+package components
+
+templ Header() {
+	<div class="navbar bg-base-100">
+		<div class="flex-1">
+			@navBarTitle()
+		</div>
+		<div class="flex-none">
+			<ul class="menu menu-horizontal px-1">
+				<li>
+					@navBarButton("Sign In", "/signIn")
+				</li>
+				<li>
+					@navBarButton("Sign Up", "/signUp")
+				</li>
+			</ul>
+		</div>
+	</div>
+}
+
+templ SignIn() {
+	@signForm("/user/signin") {
+		<h1 class="text-center text-2xl my-2">Sign In</h1>
+		@signInput("email", "email", "Email")
+		@signInput("password", "password", "Password")
+	}
+}
+
+templ SignUp() {
+	@signForm("/user/signup") {
+		<h1 class="text-center text-2xl my-2">Sign Up</h1>
+		@signInput("name", "text", "Name")
+		@signInput("email", "email", "Email")
+		@signInput("password", "password", "Password")
+		@signInput("password", "password", "Password Again")
+	}
+}
+
+templ signForm(endpoint string) {
+	<form
+ 		class={
+			"flex flex-col grid",
+			"justify-self-center",
+			"mx-20 my-4",
+		}
+		action={templ.SafeURL(endpoint)}
+	>
+		{ children... }
+		@submitButton()
+	</form>
+}
+
+templ navBarTitle() {
+	<a
+ 		class="btn btn-ghost text-xl"
+ 		hx-trigger="click"
+ 		hx-get="/"
+ 		hx-target="body"
+ 		hx-push-url="true"
+ 		hx-swap="outerHTML"
+	>
+		URDB: movie database
+	</a>
+}
+
+templ navBarButton(label, href string) {
+	<button
+ 		hx-trigger="click"
+ 		hx-get={ href }
+ 		hx-target="body"
+ 		hx-push-url="true"
+ 		hx-swap="outerHTML"
+	>
+		{ label }
+	</button>
+}
+
+templ submitButton() {
+	<button
+ 		class={
+			"btn btn-accent",
+			"rounded-badge",
+			"justify-self-center",
+			"w-min",
+		}
+	>
+		Done!
+	</button>
+}
+
+templ signInput(name, _type, placeholder string) {
+	<input
+		class="input input-bordered border-2 my-2"
+		name={name}
+		placeholder={placeholder}
+		type={_type}
+	/>
+}

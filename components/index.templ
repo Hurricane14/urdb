@@ -1,0 +1,27 @@
+package components
+
+templ Index(components ...templ.Component) {
+	<html>
+		<head>
+			<title>URDB</title>
+			<script src="static/htmx.min.js"></script>
+			<link href="static/daisyui.min.css" rel="stylesheet" type="text/css"/>
+			<script src="https://cdn.tailwindcss.com"></script>
+		</head>
+		<body class="flex justify-center">
+			<style type="text/css">
+				.htmx-indicator {
+					opacity: 0;
+				}
+				.htmx-request .htmx-indicator {
+					opacity: 1;
+				}
+			</style>
+			<div class="w-3/5 p-10">
+				for _, component := range components {
+					@component
+				}
+			</div>
+		</body>
+	</html>
+}

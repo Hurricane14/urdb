@@ -1,0 +1,105 @@
+package components
+
+import (
+	"urdb/model"
+	"fmt"
+)
+
+const (
+	moviesDivID     = "movies"
+	moviesDivTarget = "#movies"
+)
+
+templ Movies(movies []model.MovieInfo) {
+	for _, movie := range movies {
+		@MovieInfo(movie)
+	}
+}
+
+templ MoviesDiv(components ...templ.Component) {
+	<div id={ moviesDivID } class="grid grid-cols-1 p-3">
+		for _, component := range components {
+			@component
+		}
+	</div>
+}
+
+templ MovieInfo(movie model.MovieInfo) {
+	<div class="card">
+		<div class="card-body">
+			<h2 class="card-title">
+				{ fmt.Sprintf("%s (%d)", movie.Title, movie.Year) }
+			</h2>
+			<p>{ movie.Brief }</p>
+			<div class="card-actions justify-end">
+				for _, genre := range movie.Genres {
+					<div class="badge badge-outline">{ genre }</div>
+				}
+				@ratingBadge(movie.Rating)
+			</div>
+		</div>
+	</div>
+}
+
+templ ratingBadge(rating float64) {
+	<div
+ 		class={ "badge", map[string]bool {
+		"badge-success": rating >= 4.0,
+		"badge-warning": rating >= 2.7 && rating < 4.0,
+		"badge-error": rating < 2.7,
+	} }
+	>
+		{ fmt.Sprintf("%.1f*", rating) }
+	</div>
+}
+
+templ More(more bool, limit, offset int) {
+	if !more {
+		<p class="text-center">That's all folks!</p>
+	} else {
+		@moreButton(limit, offset)
+	}
+}
+
+templ moreButton(limit, offset int) {
+	<button
+ 		class={
+			"btn btn-accent",
+			"rounded-badge",
+			"justify-self-center",
+			"w-min", "my-3",
+		}
+ 		hx-get={ fmt.Sprintf("/latestMovies?limit=%d&offset=%d", limit, offset) }
+ 		hx-trigger="click"
+ 		hx-swap="outerHTML"
+ 		hx-indicator="#hx-indicator"
+ 		hx-disable-elt="this"
+	>
+		More!
+	</button>
+}
+
+templ LoadingIndicator() {
+	<div id="hx-indicator" class="htmx-indicator justify-self-center">
+		<span class="loading loading-infinity loading-lg"></span>
+	</div>
+}
+
+templ SearchBar() {
+	<div class="p-3">
+		<input
+ 			class={
+				"input input-bordered input-accent",
+				"w-full",
+			}
+ 			name="q"
+ 			hx-get="/searchMovies"
+ 			hx-trigger="keyup changed delay:500ms"
+ 			hx-target={ moviesDivTarget }
+ 			hx-swap="outerHTML"
+ 			hx-indicator="#hx-indicator"
+ 			hx-disable-elt="this"
+ 			placeholder="Search..."
+		/>
+	</div>
+}
