@@ -43,14 +43,20 @@ templ MovieInfo(movie model.MovieInfo) {
 
 templ ratingBadge(rating float64) {
 	<div
- 		class={ "badge", map[string]bool {
-		"badge-success": rating >= 4.0,
-		"badge-warning": rating >= 2.7 && rating < 4.0,
-		"badge-error": rating < 2.7,
-	} }
+ 		class={ "badge", ratingClass(rating) }
 	>
 		{ fmt.Sprintf("%.1f*", rating) }
 	</div>
+}
+
+func ratingClass(rating float64) string {
+	if rating >= 4.0 {
+		return "badge-success"
+	} else if rating >= 2.7 {
+		return "badge-warning"
+	} else {
+		return "badge-error"
+	}
 }
 
 templ More(more bool, limit, offset int) {
@@ -72,15 +78,15 @@ templ moreButton(limit, offset int) {
  		hx-get={ fmt.Sprintf("/latestMovies?limit=%d&offset=%d", limit, offset) }
  		hx-trigger="click"
  		hx-swap="outerHTML"
- 		hx-indicator="#hx-indicator"
+ 		hx-indicator="#movies-loading-indicator"
  		hx-disable-elt="this"
 	>
 		More!
 	</button>
 }
 
-templ LoadingIndicator() {
-	<div id="hx-indicator" class="htmx-indicator justify-self-center">
+templ MoviesLoadingIndicator() {
+	<div id="movies-loading-indicator" class="htmx-indicator justify-self-center">
 		<span class="loading loading-infinity loading-lg"></span>
 	</div>
 }
@@ -89,7 +95,9 @@ templ SearchBar() {
 	<div class="p-3">
 		<input
  			class={
-				"input input-bordered input-accent",
+				"input",
+				"input-bordered",
+				"input-accent",
 				"w-full",
 			}
  			name="q"
@@ -97,7 +105,7 @@ templ SearchBar() {
  			hx-trigger="keyup changed delay:500ms"
  			hx-target={ moviesDivTarget }
  			hx-swap="outerHTML"
- 			hx-indicator="#hx-indicator"
+ 			hx-indicator="#movies-loading-indicator"
  			hx-disable-elt="this"
  			placeholder="Search..."
 		/>

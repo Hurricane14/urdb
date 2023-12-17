@@ -3,7 +3,9 @@ package components
 import "strings"
 
 templ Header() {
-	<div class="navbar bg-base-100">
+	<div
+ 		class="navbar bg-base-100"
+	>
 		<div class="flex-1">
 			@navBarTitle()
 		</div>
@@ -22,7 +24,7 @@ templ Header() {
 
 templ SignIn() {
 	@signForm("/user/signin") {
-		<h1 class="text-center text-2xl my-2">Sign In</h1>
+		<h1 class="text-center text-2xl my-2">Sign In to URDB</h1>
 		@signInput("email", "email", "Email")
 		@signInput("password", "password", "Password")
 		@submitButton("Sign In")
@@ -31,7 +33,7 @@ templ SignIn() {
 
 templ SignUp() {
 	@signForm("/user/signup") {
-		<h1 class="text-center text-2xl my-2">Sign Up</h1>
+		<h1 class="text-center text-2xl my-2">Register for URDB</h1>
 		@signInput("name", "text", "Name")
 		@signInput("email", "email", "Email")
 		@signInput("password", "password", "Password")
@@ -47,7 +49,7 @@ templ signForm(endpoint string) {
 			"justify-self-center",
 			"mx-20 my-4",
 		}
-		action={templ.SafeURL(endpoint)}
+ 		action={ templ.SafeURL(endpoint) }
 	>
 		{ children... }
 	</form>
@@ -59,10 +61,12 @@ templ navBarTitle() {
  		hx-trigger="click"
  		hx-get="/"
  		hx-target="body"
+		hx-indicator="#header-indicator"
  		hx-push-url="/"
  		hx-swap="innerHTML"
 	>
 		URDB: movie database
+		@headerLoadingIndicator()
 	</a>
 }
 
@@ -75,6 +79,7 @@ templ navBarButton(label, formURL string) {
  		hx-trigger="click"
  		hx-get={ formURL }
  		hx-target="#content"
+		hx-indicator="#header-indicator"
  		hx-push-url={ toHistoryURL(formURL) }
  		hx-swap="innerHTML"
 	>
@@ -89,17 +94,24 @@ templ submitButton(name string) {
 			"rounded-badge",
 			"justify-self-center",
 			"w-content",
+			"my-1",
 		}
 	>
-		{name}
+		{ name }
 	</button>
 }
 
 templ signInput(name, _type, placeholder string) {
 	<input
-		class="input input-bordered border-2 my-2"
-		name={name}
-		placeholder={placeholder}
-		type={_type}
+ 		class="input input-bordered border-2 my-2"
+ 		name={ name }
+ 		placeholder={ placeholder }
+ 		type={ _type }
 	/>
+}
+
+templ headerLoadingIndicator() {
+	<div id="header-indicator" class="htmx-indicator justify-self-center">
+		<span class="loading loading-infinity loading-lg"></span>
+	</div>
 }

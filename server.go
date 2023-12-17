@@ -59,7 +59,7 @@ func (s *server) index(c echo.Context) error {
 	movies := components.MoviesDiv(
 		components.Movies(moviesInfo),
 		components.More(len(moviesInfo) == limit, limit, limit+offset),
-		components.LoadingIndicator(),
+		components.MoviesLoadingIndicator(),
 	)
 	page := components.Index(header, searchBar, movies)
 
@@ -92,7 +92,7 @@ func (s *server) searchMovies(c echo.Context) error {
 		}
 		return components.MoviesDiv(
 			components.Movies(moviesInfo),
-			components.LoadingIndicator(),
+			components.MoviesLoadingIndicator(),
 		).Render(c.Request().Context(), c.Response().Writer)
 	}
 
@@ -104,7 +104,7 @@ func (s *server) searchMovies(c echo.Context) error {
 	movies := components.MoviesDiv(
 		components.Movies(moviesInfo),
 		components.More(more(moviesInfo, limit), limit, limit+offset),
-		components.LoadingIndicator(),
+		components.MoviesLoadingIndicator(),
 	)
 	return movies.Render(c.Request().Context(), c.Response().Writer)
 }
@@ -117,6 +117,7 @@ func (s *server) signIn(c echo.Context) error {
 }
 
 func (s *server) signInForm(c echo.Context) error {
+	time.Sleep(time.Second)
 	return components.
 		SignIn().
 		Render(c.Request().Context(), c.Response().Writer)
@@ -130,6 +131,7 @@ func (s *server) signUp(c echo.Context) error {
 }
 
 func (s *server) signUpForm(c echo.Context) error {
+	time.Sleep(time.Second)
 	return components.
 		SignUp().
 		Render(c.Request().Context(), c.Response().Writer)

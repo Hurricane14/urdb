@@ -166,11 +166,7 @@ func ratingBadge(rating float64) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var8 = []any{"badge", map[string]bool{
-			"badge-success": rating >= 4.0,
-			"badge-warning": rating >= 2.7 && rating < 4.0,
-			"badge-error":   rating < 2.7,
-		}}
+		var templ_7745c5c3_Var8 = []any{"badge", ratingClass(rating)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -201,6 +197,16 @@ func ratingBadge(rating float64) templ.Component {
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func ratingClass(rating float64) string {
+	if rating >= 4.0 {
+		return "badge-success"
+	} else if rating >= 2.7 {
+		return "badge-warning"
+	} else {
+		return "badge-error"
+	}
 }
 
 func More(more bool, limit, offset int) templ.Component {
@@ -282,7 +288,7 @@ func moreButton(limit, offset int) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-trigger=\"click\" hx-swap=\"outerHTML\" hx-indicator=\"#hx-indicator\" hx-disable-elt=\"this\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-trigger=\"click\" hx-swap=\"outerHTML\" hx-indicator=\"#movies-loading-indicator\" hx-disable-elt=\"this\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -302,7 +308,7 @@ func moreButton(limit, offset int) templ.Component {
 	})
 }
 
-func LoadingIndicator() templ.Component {
+func MoviesLoadingIndicator() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -315,7 +321,7 @@ func LoadingIndicator() templ.Component {
 			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"hx-indicator\" class=\"htmx-indicator justify-self-center\"><span class=\"loading loading-infinity loading-lg\"></span></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"movies-loading-indicator\" class=\"htmx-indicator justify-self-center\"><span class=\"loading loading-infinity loading-lg\"></span></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -344,7 +350,9 @@ func SearchBar() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 = []any{
-			"input input-bordered input-accent",
+			"input",
+			"input-bordered",
+			"input-accent",
 			"w-full",
 		}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var17...)
@@ -367,7 +375,7 @@ func SearchBar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\" hx-indicator=\"#hx-indicator\" hx-disable-elt=\"this\" placeholder=\"Search...\"></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"outerHTML\" hx-indicator=\"#movies-loading-indicator\" hx-disable-elt=\"this\" placeholder=\"Search...\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
