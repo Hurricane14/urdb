@@ -9,11 +9,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type repository struct {
+type moviesRepository struct {
 	db *sql.DB
 }
 
-func newRepository() (*repository, error) {
+func newMoviesRepository() (*moviesRepository, error) {
 	db, err := sql.Open("sqlite3", "sqlite.db")
 	if err != nil {
 		return nil, err
@@ -23,10 +23,10 @@ func newRepository() (*repository, error) {
 		return nil, err
 	}
 
-	return &repository{db}, nil
+	return &moviesRepository{db}, nil
 }
 
-func (r *repository) latestMovies(ctx context.Context, limit, offset int) (movies []model.MovieInfo, err error) {
+func (r *moviesRepository) Latest(ctx context.Context, limit, offset int) (movies []model.MovieInfo, err error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, title, year, brief
 		FROM movies
@@ -63,7 +63,7 @@ func (r *repository) latestMovies(ctx context.Context, limit, offset int) (movie
 	return movies, nil
 }
 
-func (r *repository) searchMovies(ctx context.Context, query string) (movies []model.MovieInfo, err error) {
+func (r *moviesRepository) Search(ctx context.Context, query string) (movies []model.MovieInfo, err error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, title, year, brief
 		FROM movies
@@ -99,7 +99,7 @@ func (r *repository) searchMovies(ctx context.Context, query string) (movies []m
 	return movies, nil
 }
 
-func (r *repository) genres(ctx context.Context, movieID uint64) (genres []string, err error) {
+func (r *moviesRepository) genres(ctx context.Context, movieID uint64) (genres []string, err error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT genre
 		FROM genres

@@ -7,17 +7,18 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"urdb/server"
 )
 
 func main() {
-	repo, err := newRepository()
+	movies, err := newMoviesRepository()
 	if err != nil {
 		panic(err)
 	}
 
-	server := newServer(repo)
+	server := server.New(movies)
 	go func() {
-		err := server.run(8080)
+		err := server.Run(8080)
 		if errors.Is(err, http.ErrServerClosed) {
 			return
 		} else if err != nil {
@@ -29,7 +30,7 @@ func main() {
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 	<-shutdown
 
-	if err := server.shutdown(5 * time.Second); err != nil {
+	if err := server.Shutdown(5 * time.Second); err != nil {
 		panic(err)
 	}
 }

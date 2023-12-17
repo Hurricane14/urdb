@@ -1,10 +1,8 @@
-package main
+package server
 
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"strconv"
 	"time"
 	"urdb/components"
 	"urdb/model"
@@ -14,19 +12,26 @@ import (
 
 const defaultLimit = 1
 
-type server struct {
-	router *echo.Echo
-	repo   *repository
+type MoviesRepository interface {
+	Latest(ctx context.Context, limit, offset int) ([]model.MovieInfo, error)
+	Search(ctx context.Context, query string) ([]model.MovieInfo, error)
 }
 
-func newServer(repo *repository) *server {
+type Server struct {
+	router *echo.Echo
+	movies MoviesRepository
+}
+
+func New(repo MoviesRepository) *Server {
 	e := echo.New()
-	s := &server{
+	s := &Server{
 		router: e,
-		repo:   repo,
+		movies: repo,
 	}
 
 	e.Static("/static", "static")
+	// users := e.Group("/users")
+	// users.POST("/signIn", s.userSignIn)
 	e.GET("/searchMovies", s.searchMovies)
 	e.GET("/latestMovies", s.latestMovies)
 	e.GET("/signInForm", s.signInForm)
@@ -38,19 +43,19 @@ func newServer(repo *repository) *server {
 	return s
 }
 
-func (s *server) run(port int) error {
+func (s *Server) Run(port int) error {
 	return s.router.Start(fmt.Sprintf("localhost:%d", port))
 }
 
-func (s *server) shutdown(timeout time.Duration) error {
+func (s *Server) Shutdown(timeout time.Duration) error {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	return s.router.Shutdown(ctx)
 }
 
-func (s *server) index(c echo.Context) error {
+func (s *Server) index(c echo.Context) error {
 	const limit, offset = defaultLimit, 0
-	moviesInfo, err := s.repo.latestMovies(c.Request().Context(), limit, offset)
+	moviesInfo, err := s.movies.Latest(c.Request().Context(), limit, offset)
 	if err != nil {
 		return s.internalError(c)
 	}
@@ -66,11 +71,11 @@ func (s *server) index(c echo.Context) error {
 	return page.Render(c.Request().Context(), c.Response().Writer)
 }
 
-func (s *server) latestMovies(c echo.Context) error {
+func (s *Server) latestMovies(c echo.Context) error {
 	time.Sleep(1 * time.Second)
 	limit := intQueryParamWithDefault(c, "limit", defaultLimit)
 	offset := intQueryParamWithDefault(c, "offset", 0)
-	moviesInfo, err := s.repo.latestMovies(c.Request().Context(), limit, offset)
+	moviesInfo, err := s.movies.Latest(c.Request().Context(), limit, offset)
 	if err != nil {
 		return s.internalError(c)
 	}
@@ -82,11 +87,11 @@ func (s *server) latestMovies(c echo.Context) error {
 	).Render(c.Request().Context(), c.Response().Writer)
 }
 
-func (s *server) searchMovies(c echo.Context) error {
+func (s *Server) searchMovies(c echo.Context) error {
 	time.Sleep(1 * time.Second)
 	query := c.QueryParam("q")
 	if query != "" {
-		moviesInfo, err := s.repo.searchMovies(c.Request().Context(), query)
+		moviesInfo, err := s.movies.Search(c.Request().Context(), query)
 		if err != nil {
 			return s.internalError(c)
 		}
@@ -97,7 +102,7 @@ func (s *server) searchMovies(c echo.Context) error {
 	}
 
 	limit, offset := defaultLimit, 0
-	moviesInfo, err := s.repo.latestMovies(c.Request().Context(), limit, offset)
+	moviesInfo, err := s.movies.Latest(c.Request().Context(), limit, offset)
 	if err != nil {
 		return s.internalError(c)
 	}
@@ -109,48 +114,30 @@ func (s *server) searchMovies(c echo.Context) error {
 	return movies.Render(c.Request().Context(), c.Response().Writer)
 }
 
-func (s *server) signIn(c echo.Context) error {
+func (s *Server) signIn(c echo.Context) error {
 	return components.Index(
 		components.Header(),
 		components.SignIn(),
 	).Render(c.Request().Context(), c.Response().Writer)
 }
 
-func (s *server) signInForm(c echo.Context) error {
+func (s *Server) signInForm(c echo.Context) error {
 	time.Sleep(time.Second)
 	return components.
 		SignIn().
 		Render(c.Request().Context(), c.Response().Writer)
 }
 
-func (s *server) signUp(c echo.Context) error {
+func (s *Server) signUp(c echo.Context) error {
 	return components.Index(
 		components.Header(),
 		components.SignUp(),
 	).Render(c.Request().Context(), c.Response().Writer)
 }
 
-func (s *server) signUpForm(c echo.Context) error {
+func (s *Server) signUpForm(c echo.Context) error {
 	time.Sleep(time.Second)
 	return components.
 		SignUp().
 		Render(c.Request().Context(), c.Response().Writer)
-}
-
-func more(movies []model.MovieInfo, limit int) bool {
-	return len(movies) == limit
-}
-
-func (s *server) internalError(c echo.Context) error {
-	c.Response().WriteHeader(http.StatusInternalServerError)
-	return nil
-}
-
-func intQueryParamWithDefault(c echo.Context, name string, dflt int) int {
-	p := c.QueryParam(name)
-	if v, err := strconv.Atoi(p); err != nil {
-		return dflt
-	} else {
-		return v
-	}
 }
