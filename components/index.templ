@@ -1,6 +1,6 @@
 package components
 
-templ Index(components ...templ.Component) {
+templ Index(header templ.Component, contents ...templ.Component) {
 	<html>
 		<head>
 			<title>URDB</title>
@@ -18,9 +18,12 @@ templ Index(components ...templ.Component) {
 				}
 			</style>
 			<div class="w-3/5 p-10">
-				for _, component := range components {
-					@component
-				}
+				@header
+				<div id="content">
+					for _, component := range contents {
+						@component
+					}
+				</div>
 			</div>
 		</body>
 	</html>

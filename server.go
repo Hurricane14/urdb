@@ -29,7 +29,9 @@ func newServer(repo *repository) *server {
 	e.Static("/static", "static")
 	e.GET("/searchMovies", s.searchMovies)
 	e.GET("/latestMovies", s.latestMovies)
+	e.GET("/signInForm", s.signInForm)
 	e.GET("/signIn", s.signIn)
+	e.GET("/signUpForm", s.signUpForm)
 	e.GET("/signUp", s.signUp)
 	e.GET("/", s.index)
 
@@ -114,8 +116,10 @@ func (s *server) signIn(c echo.Context) error {
 	).Render(c.Request().Context(), c.Response().Writer)
 }
 
-func more(movies []model.MovieInfo, limit int) bool {
-	return len(movies) == limit
+func (s *server) signInForm(c echo.Context) error {
+	return components.
+		SignIn().
+		Render(c.Request().Context(), c.Response().Writer)
 }
 
 func (s *server) signUp(c echo.Context) error {
@@ -123,6 +127,16 @@ func (s *server) signUp(c echo.Context) error {
 		components.Header(),
 		components.SignUp(),
 	).Render(c.Request().Context(), c.Response().Writer)
+}
+
+func (s *server) signUpForm(c echo.Context) error {
+	return components.
+		SignUp().
+		Render(c.Request().Context(), c.Response().Writer)
+}
+
+func more(movies []model.MovieInfo, limit int) bool {
+	return len(movies) == limit
 }
 
 func (s *server) internalError(c echo.Context) error {

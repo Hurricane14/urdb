@@ -10,6 +10,8 @@ import "context"
 import "io"
 import "bytes"
 
+import "strings"
+
 func Header() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -35,7 +37,7 @@ func Header() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = navBarButton("Sign In", "/signIn").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = navBarButton("Sign In", "/signInForm").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -43,7 +45,7 @@ func Header() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = navBarButton("Sign Up", "/signUp").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = navBarButton("Sign Up", "/signUpForm").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -269,7 +271,7 @@ func navBarTitle() templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a class=\"btn btn-ghost text-xl\" hx-trigger=\"click\" hx-get=\"/\" hx-target=\"body\" hx-push-url=\"true\" hx-swap=\"outerHTML\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a class=\"btn btn-ghost text-xl\" hx-trigger=\"click\" hx-get=\"/\" hx-target=\"body\" hx-push-url=\"/\" hx-swap=\"innerHTML\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -287,6 +289,10 @@ func navBarTitle() templ.Component {
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func toHistoryURL(url string) string {
+	return strings.TrimSuffix(url, "Form")
 }
 
 func navBarButton(label, href string) templ.Component {
@@ -310,7 +316,15 @@ func navBarButton(label, href string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"body\" hx-push-url=\"true\" hx-swap=\"outerHTML\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#content\" hx-push-url=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(toHistoryURL(href)))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"innerHTML\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

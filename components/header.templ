@@ -1,5 +1,7 @@
 package components
 
+import "strings"
+
 templ Header() {
 	<div class="navbar bg-base-100">
 		<div class="flex-1">
@@ -8,10 +10,10 @@ templ Header() {
 		<div class="flex-none">
 			<ul class="menu menu-horizontal px-1">
 				<li>
-					@navBarButton("Sign In", "/signIn")
+					@navBarButton("Sign In", "/signInForm")
 				</li>
 				<li>
-					@navBarButton("Sign Up", "/signUp")
+					@navBarButton("Sign Up", "/signUpForm")
 				</li>
 			</ul>
 		</div>
@@ -56,20 +58,24 @@ templ navBarTitle() {
  		hx-trigger="click"
  		hx-get="/"
  		hx-target="body"
- 		hx-push-url="true"
- 		hx-swap="outerHTML"
+ 		hx-push-url="/"
+ 		hx-swap="innerHTML"
 	>
 		URDB: movie database
 	</a>
+}
+
+func toHistoryURL(url string) string {
+	return strings.TrimSuffix(url, "Form")
 }
 
 templ navBarButton(label, href string) {
 	<button
  		hx-trigger="click"
  		hx-get={ href }
- 		hx-target="body"
- 		hx-push-url="true"
- 		hx-swap="outerHTML"
+ 		hx-target="#content"
+ 		hx-push-url={ toHistoryURL(href) }
+ 		hx-swap="innerHTML"
 	>
 		{ label }
 	</button>
