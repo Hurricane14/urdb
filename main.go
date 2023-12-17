@@ -11,12 +11,11 @@ import (
 )
 
 func main() {
-	movies, err := newMoviesRepository()
-	if err != nil {
+	if err := initRepositories(); err != nil {
 		panic(err)
 	}
 
-	server := server.New(movies)
+	server := server.New(users, movies)
 	go func() {
 		err := server.Run(8080)
 		if errors.Is(err, http.ErrServerClosed) {

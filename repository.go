@@ -9,21 +9,33 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type usersRepository struct {
+	db *sql.DB
+}
+
 type moviesRepository struct {
 	db *sql.DB
 }
 
-func newMoviesRepository() (*moviesRepository, error) {
+var (
+	movies *moviesRepository
+	users  *usersRepository
+)
+
+func initRepositories() error {
 	db, err := sql.Open("sqlite3", "sqlite.db")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := db.Ping(); err != nil {
-		return nil, err
+		return err
 	}
 
-	return &moviesRepository{db}, nil
+	movies = &moviesRepository{db}
+	users = &usersRepository{db}
+
+	return nil
 }
 
 func (r *moviesRepository) Latest(ctx context.Context, limit, offset int) (movies []model.MovieInfo, err error) {
@@ -128,4 +140,26 @@ func (r *moviesRepository) genres(ctx context.Context, movieID uint64) (genres [
 	}
 
 	return genres, nil
+}
+
+func (r *usersRepository) SignIn(ctx context.Context, email, password string) (user model.User, err error) {
+	u := model.User{}
+	row := r.db.QueryRowContext(ctx,
+		`
+		SELECT id, name FROM users
+		WHERE email = ? AND password = ?
+		`,
+		email, password,
+	)
+	if err := row.Err(); err != nil {
+		return model.User{}, err
+	}
+
+	if err := row.Scan(&u.ID, &u.Name); err != nil {
+		return model.User{}, err
+	}
+
+	u.Email = email
+	u.Password = password
+	return u, nil
 }

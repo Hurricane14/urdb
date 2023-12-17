@@ -23,7 +23,7 @@ templ Header() {
 }
 
 templ SignIn() {
-	@signForm("/user/signin") {
+	@signForm("/users/signIn") {
 		<h1 class="text-center text-2xl my-2">Sign In to URDB</h1>
 		@signInput("email", "email", "Email")
 		@signInput("password", "password", "Password")
@@ -32,7 +32,7 @@ templ SignIn() {
 }
 
 templ SignUp() {
-	@signForm("/user/signup") {
+	@signForm("/users/signUp") {
 		<h1 class="text-center text-2xl my-2">Register for URDB</h1>
 		@signInput("name", "text", "Name")
 		@signInput("email", "email", "Email")
@@ -49,6 +49,7 @@ templ signForm(endpoint string) {
 			"justify-self-center",
 			"mx-20 my-4",
 		}
+		method="post"
  		action={ templ.SafeURL(endpoint) }
 	>
 		{ children... }

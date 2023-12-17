@@ -17,6 +17,11 @@ func (s *Server) internalError(c echo.Context) error {
 	return nil
 }
 
+func (s *Server) badRequest(c echo.Context) error {
+	c.Response().WriteHeader(http.StatusBadRequest)
+	return nil
+}
+
 func intQueryParamWithDefault(c echo.Context, name string, dflt int) int {
 	p := c.QueryParam(name)
 	if v, err := strconv.Atoi(p); err != nil {
