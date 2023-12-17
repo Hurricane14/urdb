@@ -25,6 +25,7 @@ templ SignIn() {
 		<h1 class="text-center text-2xl my-2">Sign In</h1>
 		@signInput("email", "email", "Email")
 		@signInput("password", "password", "Password")
+		@submitButton("Sign In")
 	}
 }
 
@@ -35,6 +36,7 @@ templ SignUp() {
 		@signInput("email", "email", "Email")
 		@signInput("password", "password", "Password")
 		@signInput("password", "password", "Password Again")
+		@submitButton("Sign Up")
 	}
 }
 
@@ -48,7 +50,6 @@ templ signForm(endpoint string) {
 		action={templ.SafeURL(endpoint)}
 	>
 		{ children... }
-		@submitButton()
 	</form>
 }
 
@@ -69,28 +70,28 @@ func toHistoryURL(url string) string {
 	return strings.TrimSuffix(url, "Form")
 }
 
-templ navBarButton(label, href string) {
+templ navBarButton(label, formURL string) {
 	<button
  		hx-trigger="click"
- 		hx-get={ href }
+ 		hx-get={ formURL }
  		hx-target="#content"
- 		hx-push-url={ toHistoryURL(href) }
+ 		hx-push-url={ toHistoryURL(formURL) }
  		hx-swap="innerHTML"
 	>
 		{ label }
 	</button>
 }
 
-templ submitButton() {
+templ submitButton(name string) {
 	<button
  		class={
 			"btn btn-accent",
 			"rounded-badge",
 			"justify-self-center",
-			"w-min",
+			"w-content",
 		}
 	>
-		Done!
+		{name}
 	</button>
 }
 
