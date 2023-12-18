@@ -11,7 +11,9 @@ import (
 
 func (s *Server) signIn(c echo.Context) error {
 	return components.Index(
-		components.Header(),
+		components.Header(
+			getUsernameFromCtx(c),
+		),
 		components.SignIn(),
 	).Render(c.Request().Context(), c.Response().Writer)
 }
@@ -26,7 +28,9 @@ func (s *Server) signInForm(c echo.Context) error {
 
 func (s *Server) signUp(c echo.Context) error {
 	return components.Index(
-		components.Header(),
+		components.Header(
+			getUsernameFromCtx(c),
+		),
 		components.SignUp(),
 	).Render(c.Request().Context(), c.Response().Writer)
 }
@@ -72,9 +76,8 @@ func (s *Server) userSignIn(c echo.Context) error {
 			Render(c.Request().Context(), c.Response().Writer)
 	}
 
-	expireAt := time.Now().Add(s.cookieTTL)
-	token := s.auth.CreateToken(user.ID, expireAt)
-	setTokenCookie(c, token, expireAt)
+	token := s.auth.CreateToken(user.ID, time.Now().Add(s.cookieTTL))
+	setTokenCookie(c, token, s.cookieTTL)
 
 	s.router.Logger.Debugf("Set cookie for user %s", user.Name)
 	c.Response().Header().Set("HX-Location", "/")
@@ -121,6 +124,6 @@ func (s *Server) userSignUp(c echo.Context) error {
 }
 
 func (s *Server) userSignOut(c echo.Context) error {
-	setTokenCookie(c, "", time.Now().Add(-time.Hour))
+	setTokenCookie(c, "", 0)
 	return nil
 }

@@ -1,23 +1,47 @@
 package components
 
-templ Header() {
+templ Header(username string) {
 	<div
  		class="navbar bg-base-100"
 	>
 		<div class="flex-1">
 			@navBarTitle()
 		</div>
-		<div class="flex-none">
-			<ul class="menu menu-horizontal px-1">
-				<li>
-					@navBarButton("Sign In", "/signInForm")
-				</li>
-				<li>
-					@navBarButton("Sign Up", "/signUpForm")
-				</li>
-			</ul>
-		</div>
+		if username == "" {
+			<div class="flex-none">
+				<ul class="menu menu-horizontal px-1">
+					<li>
+						@navBarGetButton("Sign In", "/signInForm")
+					</li>
+					<li>
+						@navBarGetButton("Sign Up", "/signUpForm")
+					</li>
+				</ul>
+			</div>
+		} else {
+			<div class="flex-none">
+				<ul class="menu menu-horizontal px-1">
+					<li>
+						@profileDetails(username)
+					</li>
+				</ul>
+			</div>
+		}
 	</div>
+}
+
+templ profileDetails(username string) {
+	<details>
+		<summary>{ username } </summary>
+		<ul>
+			<li>
+				@navBarGetButton("My profile", "/users/profile")
+			</li>
+			<li>
+				@navBarPostButton("Sign Out", "/users/signOut")
+			</li>
+		</ul>
+	</details>
 }
 
 templ navBarTitle() {
@@ -35,10 +59,22 @@ templ navBarTitle() {
 	</a>
 }
 
-templ navBarButton(label, endpoint string) {
+templ navBarGetButton(label, endpoint string) {
 	<button
  		hx-trigger="click"
  		hx-get={ endpoint }
+ 		hx-target="#content"
+ 		hx-indicator="#header-indicator"
+ 		hx-swap="innerHTML"
+	>
+		{ label }
+	</button>
+}
+
+templ navBarPostButton(label, endpoint string) {
+	<button
+ 		hx-trigger="click"
+ 		hx-post={ endpoint }
  		hx-target="#content"
  		hx-indicator="#header-indicator"
  		hx-swap="innerHTML"

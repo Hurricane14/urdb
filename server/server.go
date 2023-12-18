@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 	"urdb/components"
 	"urdb/model"
@@ -10,6 +11,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/schema"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 )
 
@@ -69,6 +71,20 @@ func New(
 	e.Static("/static", "static")
 
 	e.Use(s.processAuthToken)
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"localhost"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost},
+		AllowHeaders: []string{
+			"HX-Boosted",
+			"HX-Current-URL",
+			"HX-History-Restore-Request",
+			"HX-Prompt",
+			"HX-Request",
+			"HX-Target",
+			"HX-TriggerName",
+			"HX-Trigger",
+		},
+	}))
 
 	usersAPI := e.Group("/users")
 	usersAPI.POST("/signIn", s.userSignIn)
@@ -102,7 +118,7 @@ func (s *Server) index(c echo.Context) error {
 	if err != nil {
 		return s.internalError(c)
 	}
-	header := components.Header()
+	header := components.Header(getUsernameFromCtx(c))
 	searchBar := components.SearchBar()
 	movies := components.MoviesDiv(
 		components.Movies(moviesInfo),

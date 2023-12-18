@@ -32,14 +32,15 @@ func intQueryParamWithDefault(c echo.Context, name string, dflt int) int {
 	}
 }
 
-func setTokenCookie(c echo.Context, token string, expireAt time.Time) {
+func setTokenCookie(c echo.Context, token string, ttl time.Duration) {
 	c.SetCookie(&http.Cookie{
 		Name:     "URDB-Authorization",
 		Value:    token,
-		Expires:  expireAt,
+		Path:     "/",
+		MaxAge:   int(ttl.Seconds()),
 		Secure:   true,
 		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteStrictMode,
 	})
 }
 
@@ -58,4 +59,12 @@ func setUserInCtx(c echo.Context, u model.User) {
 func getUserFromCtx(c echo.Context) (model.User, bool) {
 	val, ok := c.Get("User").(model.User)
 	return val, ok
+}
+
+func getUsernameFromCtx(c echo.Context) string {
+	u, ok := getUserFromCtx(c)
+	if !ok {
+		return ""
+	}
+	return u.Name
 }
