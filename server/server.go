@@ -25,16 +25,18 @@ type MoviesRepository interface {
 	Search(ctx context.Context, query string) ([]model.MovieInfo, error)
 }
 
-type TokenHandler interface {
-	Create(id uint64, expireAt time.Time) string
-	Parse(token string) (uint64, error)
+type AuthService interface {
+	CreateToken(id uint64, expireAt time.Time) string
+	ParseToken(token string) (uint64, error)
+	HashPassword(pass string) []byte
+	MatchPassword(got string, want []byte) bool
 }
 
 type Server struct {
 	router    *echo.Echo
 	users     UsersRepository
 	movies    MoviesRepository
-	tokens    TokenHandler
+	auth      AuthService
 	schema    *schema.Decoder
 	validator *validator.Validate
 	cookieTTL time.Duration
@@ -43,7 +45,7 @@ type Server struct {
 func New(
 	users UsersRepository,
 	movies MoviesRepository,
-	tokens TokenHandler,
+	auth AuthService,
 ) *Server {
 	e := echo.New()
 	e.Logger.SetLevel(log.DEBUG)
@@ -58,7 +60,7 @@ func New(
 		router:    e,
 		users:     users,
 		movies:    movies,
-		tokens:    tokens,
+		auth:      auth,
 		schema:    decoder,
 		validator: validate,
 		cookieTTL: 24 * time.Hour,

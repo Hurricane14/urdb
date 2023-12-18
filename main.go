@@ -11,12 +11,12 @@ import (
 )
 
 func main() {
-	tokens := newTokenHandler(os.Getenv("TOKEN_SECRET"))
+	auther := newAuther(os.Getenv("TOKEN_SECRET"))
 	if err := initRepositories(); err != nil {
 		panic(err)
 	}
 
-	server := server.New(users, movies, tokens)
+	server := server.New(users, movies, auther)
 	go func() {
 		err := server.Run(8080)
 		if errors.Is(err, http.ErrServerClosed) {

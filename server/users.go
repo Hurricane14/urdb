@@ -65,16 +65,16 @@ func (s *Server) userSignIn(c echo.Context) error {
 	}
 
 	user, err := s.users.ByEmail(c.Request().Context(), form.Email)
-	if err != nil && !errors.Is(err, model.ErrLoginMismatch) {
+	if err != nil && !errors.Is(err, model.ErrUserNotExist) {
 		return s.internalError(c)
-	} else if errors.Is(err, model.ErrLoginMismatch) || user.Password != form.Password {
+	} else if errors.Is(err, model.ErrUserNotExist) || user.Password != form.Password {
 		return components.
-			ValidationList(model.ErrLoginMismatch).
+			ValidationList(model.ErrUserNotExist).
 			Render(c.Request().Context(), c.Response().Writer)
 	}
 
 	expireAt := time.Now().Add(s.cookieTTL)
-	token := s.tokens.Create(user.ID, expireAt)
+	token := s.auth.CreateToken(user.ID, expireAt)
 	c.SetCookie(&http.Cookie{
 		Name:     "URDB-Authorization",
 		Value:    token,
@@ -118,9 +118,9 @@ func (s *Server) userSignUp(c echo.Context) error {
 	_, err := s.users.ByEmail(c.Request().Context(), form.Email)
 	if err == nil {
 		return components.
-			ValidationList(model.ErrUserWithEmailExists).
+			ValidationList(model.ErrUserExist).
 			Render(c.Request().Context(), c.Response().Writer)
-	} else if !errors.Is(err, model.ErrLoginMismatch) {
+	} else if !errors.Is(err, model.ErrUserNotExist) {
 		s.internalError(c)
 	}
 

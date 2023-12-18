@@ -151,7 +151,7 @@ func (r *usersRepository) ByEmail(ctx context.Context, email string) (user model
 	)
 	if err := row.Err(); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			err = model.ErrLoginMismatch
+			err = model.ErrUserNotExist
 		}
 
 		return model.User{}, err

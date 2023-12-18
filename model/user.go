@@ -10,6 +10,6 @@ type User struct {
 }
 
 var (
-	ErrLoginMismatch       = errors.New("User with this email and password not found")
-	ErrUserWithEmailExists = errors.New("User with this email already exists")
+	ErrUserNotExist = errors.New("User with this email and password not found")
+	ErrUserExist    = errors.New("User with this email already exists")
 )
