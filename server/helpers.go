@@ -13,7 +13,8 @@ func more(movies []model.MovieInfo, limit int) bool {
 	return len(movies) == limit
 }
 
-func (s *Server) internalError(c echo.Context) error {
+func (s *Server) internalError(c echo.Context, err error) error {
+	s.router.Logger.Error(err)
 	c.Response().WriteHeader(http.StatusInternalServerError)
 	return nil
 }

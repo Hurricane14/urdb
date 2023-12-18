@@ -338,7 +338,7 @@ func SearchBar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"q\" hx-get=\"/searchMovies\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#movies\" hx-swap=\"outerHTML\" hx-indicator=\"#movies-loading-indicator\" hx-disable-elt=\"this\" placeholder=\"Search...\"></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"q\" hx-get=\"/searchMovies\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#movies\" hx-swap=\"outerHTML\" hx-indicator=\"#header-indicator\" hx-disable-elt=\"this\" placeholder=\"Search...\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

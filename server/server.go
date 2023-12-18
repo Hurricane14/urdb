@@ -44,6 +44,7 @@ type Server struct {
 	schema    *schema.Decoder
 	validator *validator.Validate
 	cookieTTL time.Duration
+	delay     time.Duration
 }
 
 func New(
@@ -68,11 +69,14 @@ func New(
 		schema:    decoder,
 		validator: validate,
 		cookieTTL: 24 * time.Hour,
+		// delay:     750 * time.Millisecond,
 	}
 
 	e.Static("/static", "static")
 
 	e.Use(s.processAuthToken)
+	e.Use(s.serverDelay)
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"localhost"},
 		AllowMethods: []string{http.MethodGet, http.MethodPost},
@@ -120,7 +124,7 @@ func (s *Server) indexPage(c echo.Context) error {
 	const limit, offset = defaultLimit, 0
 	moviesInfo, err := s.movies.Latest(c.Request().Context(), limit, offset)
 	if err != nil {
-		return s.internalError(c)
+		return s.internalError(c, err)
 	}
 	header := components.Header(getUsernameFromCtx(c))
 	searchBar := components.SearchBar()

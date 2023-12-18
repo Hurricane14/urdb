@@ -1,6 +1,8 @@
 package server
 
 import (
+	"time"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -38,6 +40,15 @@ func (s *Server) requireAuthorization(next echo.HandlerFunc) echo.HandlerFunc {
 			return nil
 		}
 
+		return next(c)
+	}
+}
+
+func (s *Server) serverDelay(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if s.delay != 0 {
+			time.Sleep(s.delay)
+		}
 		return next(c)
 	}
 }

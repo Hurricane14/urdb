@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 	"urdb/components"
 	"urdb/model"
 
@@ -12,12 +11,11 @@ import (
 )
 
 func (s *Server) latestMovies(c echo.Context) error {
-	time.Sleep(1 * time.Second)
 	limit := intQueryParamWithDefault(c, "limit", defaultLimit)
 	offset := intQueryParamWithDefault(c, "offset", 0)
 	moviesInfo, err := s.movies.Latest(c.Request().Context(), limit, offset)
 	if err != nil {
-		return s.internalError(c)
+		return s.internalError(c, err)
 	}
 	if err := components.Movies(moviesInfo).Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return err
@@ -28,12 +26,11 @@ func (s *Server) latestMovies(c echo.Context) error {
 }
 
 func (s *Server) searchMovies(c echo.Context) error {
-	time.Sleep(1 * time.Second)
 	query := c.QueryParam("q")
 	if query != "" {
 		moviesInfo, err := s.movies.Search(c.Request().Context(), query)
 		if err != nil {
-			return s.internalError(c)
+			return s.internalError(c, err)
 		}
 		return components.MoviesDiv(
 			components.Movies(moviesInfo),
@@ -44,7 +41,7 @@ func (s *Server) searchMovies(c echo.Context) error {
 	limit, offset := defaultLimit, 0
 	moviesInfo, err := s.movies.Latest(c.Request().Context(), limit, offset)
 	if err != nil {
-		return s.internalError(c)
+		return s.internalError(c, err)
 	}
 	movies := components.MoviesDiv(
 		components.Movies(moviesInfo),
@@ -66,8 +63,7 @@ func (s *Server) moviePage(c echo.Context) error {
 	if errors.Is(err, model.ErrMovieNotExist) {
 		return c.String(http.StatusNotFound, "Not Found")
 	} else if err != nil {
-		s.router.Logger.Error(err)
-		return s.internalError(c)
+		return s.internalError(c, err)
 	}
 
 	return components.Index(
@@ -77,7 +73,6 @@ func (s *Server) moviePage(c echo.Context) error {
 }
 
 func (s *Server) movieInfo(c echo.Context) error {
-	time.Sleep(time.Second)
 	params := struct {
 		MovieID model.ID `param:"id"`
 	}{}
@@ -89,8 +84,7 @@ func (s *Server) movieInfo(c echo.Context) error {
 	if errors.Is(err, model.ErrMovieNotExist) {
 		return c.String(http.StatusNotFound, "Not Found")
 	} else if err != nil {
-		s.router.Logger.Error(err)
-		return s.internalError(c)
+		return s.internalError(c, err)
 	}
 
 	c.Response().Header().Set("HX-Push-Url", fmt.Sprintf("/movie/%d", params.MovieID))

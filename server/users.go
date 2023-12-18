@@ -19,7 +19,6 @@ func (s *Server) signInPage(c echo.Context) error {
 }
 
 func (s *Server) signInForm(c echo.Context) error {
-	time.Sleep(time.Second)
 	c.Response().Header().Set("HX-Push-Url", "/signUp")
 	return components.
 		SignIn().
@@ -36,7 +35,6 @@ func (s *Server) signUpPage(c echo.Context) error {
 }
 
 func (s *Server) signUpForm(c echo.Context) error {
-	time.Sleep(time.Second)
 	c.Response().Header().Set("HX-Push-Url", "/signUp")
 	return components.
 		SignUp().
@@ -69,7 +67,7 @@ func (s *Server) userSignIn(c echo.Context) error {
 
 	user, err := s.users.ByEmail(c.Request().Context(), form.Email)
 	if err != nil && !errors.Is(err, model.ErrUserNotExist) {
-		return s.internalError(c)
+		return s.internalError(c, err)
 	} else if errors.Is(err, model.ErrUserNotExist) || user.Password != form.Password {
 		return components.
 			ValidationList(model.ErrUserNotExist).
@@ -120,7 +118,7 @@ func (s *Server) userSignUp(c echo.Context) error {
 			ValidationList(model.ErrUserExist).
 			Render(c.Request().Context(), c.Response().Writer)
 	} else if !errors.Is(err, model.ErrUserNotExist) {
-		s.internalError(c)
+		s.internalError(c, err)
 	}
 
 	c.Response().Header().Set("HX-Location", "/signIn")
