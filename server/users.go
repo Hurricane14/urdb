@@ -110,8 +110,12 @@ func (s *Server) userSignUp(c echo.Context) error {
 			Render(c.Request().Context(), c.Response().Writer)
 	}
 
-	_, err := s.users.ByEmail(c.Request().Context(), form.Email)
-	if err == nil {
+	err := s.users.Create(c.Request().Context(), model.User{
+		Name:     form.Name,
+		Email:    form.Email,
+		Password: form.Password,
+	})
+	if errors.Is(err, model.ErrUserExist) {
 		return components.
 			ValidationList(model.ErrUserExist).
 			Render(c.Request().Context(), c.Response().Writer)

@@ -20,6 +20,7 @@ const defaultLimit = 1
 type UsersRepository interface {
 	ByEmail(ctx context.Context, email string) (model.User, error)
 	ByID(ctx context.Context, id model.ID) (model.User, error)
+	Create(ctx context.Context, user model.User) error
 }
 
 type MoviesRepository interface {

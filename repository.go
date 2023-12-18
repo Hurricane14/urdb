@@ -6,7 +6,7 @@ import (
 	"errors"
 	"urdb/model"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/mattn/go-sqlite3"
 )
 
 type usersRepository struct {
@@ -242,4 +242,25 @@ func (r *usersRepository) ByID(ctx context.Context, id model.ID) (user model.Use
 
 	u.ID = id
 	return u, nil
+}
+
+func (r *usersRepository) Create(ctx context.Context, user model.User) error {
+	_, err := r.db.ExecContext(ctx,
+		`INSERT INTO users (name, email, password)
+		VALUES (?, ?, ?)`, user.Name, user.Email, user.Password,
+	)
+	if err == nil {
+		return nil
+	}
+
+	sErr, ok := err.(sqlite3.Error)
+	if !ok {
+		return err
+	}
+
+	if sErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+		return model.ErrUserExist
+	}
+
+	return err
 }
