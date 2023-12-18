@@ -1,8 +1,6 @@
 package server
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -36,7 +34,7 @@ func (s *Server) requireAuthorization(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		_, ok := getUserFromCtx(c)
 		if !ok {
-			c.Response().WriteHeader(http.StatusUnauthorized)
+			c.Response().Header().Set("HX-Location", "/signIn")
 			return nil
 		}
 
