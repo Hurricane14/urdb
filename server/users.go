@@ -2,7 +2,6 @@ package server
 
 import (
 	"errors"
-	"net/http"
 	"time"
 	"urdb/components"
 	"urdb/model"
@@ -75,14 +74,7 @@ func (s *Server) userSignIn(c echo.Context) error {
 
 	expireAt := time.Now().Add(s.cookieTTL)
 	token := s.auth.CreateToken(user.ID, expireAt)
-	c.SetCookie(&http.Cookie{
-		Name:     "URDB-Authorization",
-		Value:    token,
-		Expires:  expireAt,
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	})
+	setTokenCookie(c, token, expireAt)
 
 	s.router.Logger.Debugf("Set cookie for user %s", user.Name)
 	c.Response().Header().Set("HX-Location", "/")
@@ -125,5 +117,10 @@ func (s *Server) userSignUp(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("HX-Location", "/signIn")
+	return nil
+}
+
+func (s *Server) userSignOut(c echo.Context) error {
+	setTokenCookie(c, "", time.Now().Add(-time.Hour))
 	return nil
 }

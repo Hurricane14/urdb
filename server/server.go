@@ -68,9 +68,12 @@ func New(
 
 	e.Static("/static", "static")
 
+	e.Use(s.processAuthToken)
+
 	usersAPI := e.Group("/users")
 	usersAPI.POST("/signIn", s.userSignIn)
 	usersAPI.POST("/signUp", s.userSignUp)
+	usersAPI.POST("/signOut", s.userSignOut, s.requireAuthorization)
 
 	e.GET("/searchMovies", s.searchMovies)
 	e.GET("/latestMovies", s.latestMovies)

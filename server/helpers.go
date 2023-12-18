@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 	"strconv"
+	"time"
 	"urdb/model"
 
 	"github.com/labstack/echo/v4"
@@ -29,4 +30,32 @@ func intQueryParamWithDefault(c echo.Context, name string, dflt int) int {
 	} else {
 		return v
 	}
+}
+
+func setTokenCookie(c echo.Context, token string, expireAt time.Time) {
+	c.SetCookie(&http.Cookie{
+		Name:     "URDB-Authorization",
+		Value:    token,
+		Expires:  expireAt,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+func getTokenFromCookie(c echo.Context) (token string, ok bool) {
+	cookie, err := c.Cookie("URDB-Authorization")
+	if err != nil {
+		return "", false
+	}
+	return cookie.Value, true
+}
+
+func setUserInCtx(c echo.Context, u model.User) {
+	c.Set("User", u)
+}
+
+func getUserFromCtx(c echo.Context) (model.User, bool) {
+	val, ok := c.Get("User").(model.User)
+	return val, ok
 }
