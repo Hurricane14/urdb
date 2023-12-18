@@ -30,7 +30,7 @@ templ MovieCard(movie model.MovieInfo) {
  				hx-indicator="#header-indicator"
  				hx-target="#content"
 			>
-				{ fmt.Sprintf("%s (%d)", movie.Title, movie.Year) }
+				<a>{ fmt.Sprintf("%s (%d)", movie.Title, movie.Year) }</a>
 			</h2>
 			<p>{ movie.Brief }</p>
 			<div class="card-actions justify-end">
