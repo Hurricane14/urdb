@@ -2,6 +2,7 @@ package components
 
 templ Header(username string) {
 	<div
+ 		id="header"
  		class="navbar bg-base-100"
 	>
 		<div class="flex-1">
@@ -38,7 +39,7 @@ templ profileDetails(username string) {
 				@navBarGetButton("My profile", "/users/profile")
 			</li>
 			<li>
-				@navBarPostButton("Sign Out", "/users/signOut")
+				@signOutButton("/users/signOut")
 			</li>
 		</ul>
 	</details>
@@ -71,15 +72,15 @@ templ navBarGetButton(label, endpoint string) {
 	</button>
 }
 
-templ navBarPostButton(label, endpoint string) {
+templ signOutButton(endpoint string) {
 	<button
  		hx-trigger="click"
  		hx-post={ endpoint }
- 		hx-target="#content"
+ 		hx-target="#header"
  		hx-indicator="#header-indicator"
  		hx-swap="innerHTML"
 	>
-		{ label }
+		{ "Sign Out" }
 	</button>
 }
 

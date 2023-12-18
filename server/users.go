@@ -125,5 +125,5 @@ func (s *Server) userSignUp(c echo.Context) error {
 
 func (s *Server) userSignOut(c echo.Context) error {
 	setTokenCookie(c, "", 0)
-	return nil
+	return components.Header("").Render(c.Request().Context(), c.Response().Writer)
 }
