@@ -19,7 +19,7 @@ func (s *Server) signInPage(c echo.Context) error {
 }
 
 func (s *Server) signInForm(c echo.Context) error {
-	c.Response().Header().Set("HX-Push-Url", "/signUp")
+	c.Response().Header().Set("HX-Push-Url", "/signIn")
 	return components.
 		SignIn().
 		Render(c.Request().Context(), c.Response().Writer)
