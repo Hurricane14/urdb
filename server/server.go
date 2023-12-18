@@ -19,17 +19,18 @@ const defaultLimit = 1
 
 type UsersRepository interface {
 	ByEmail(ctx context.Context, email string) (model.User, error)
-	ByID(ctx context.Context, id uint64) (model.User, error)
+	ByID(ctx context.Context, id model.ID) (model.User, error)
 }
 
 type MoviesRepository interface {
 	Latest(ctx context.Context, limit, offset int) ([]model.MovieInfo, error)
 	Search(ctx context.Context, query string) ([]model.MovieInfo, error)
+	ByID(ctx context.Context, id model.ID) (model.Movie, error)
 }
 
 type AuthService interface {
-	CreateToken(id uint64, expireAt time.Time) string
-	ParseToken(token string) (uint64, error)
+	CreateToken(id model.ID, expireAt time.Time) string
+	ParseToken(token string) (model.ID, error)
 	HashPassword(pass string) []byte
 	MatchPassword(got string, want []byte) bool
 }
@@ -91,13 +92,15 @@ func New(
 	usersAPI.POST("/signUp", s.userSignUp)
 	usersAPI.POST("/signOut", s.userSignOut, s.requireAuthorization)
 
+	e.GET("/movie/:id/info", s.movieInfo)
+	e.GET("/movie/:id", s.moviePage)
 	e.GET("/searchMovies", s.searchMovies)
 	e.GET("/latestMovies", s.latestMovies)
 	e.GET("/signInForm", s.signInForm)
-	e.GET("/signIn", s.signIn)
+	e.GET("/signIn", s.signInPage)
 	e.GET("/signUpForm", s.signUpForm)
-	e.GET("/signUp", s.signUp)
-	e.GET("/", s.index)
+	e.GET("/signUp", s.signUpPage)
+	e.GET("/", s.indexPage)
 
 	return s
 }
@@ -112,7 +115,7 @@ func (s *Server) Shutdown(timeout time.Duration) error {
 	return s.router.Shutdown(ctx)
 }
 
-func (s *Server) index(c echo.Context) error {
+func (s *Server) indexPage(c echo.Context) error {
 	const limit, offset = defaultLimit, 0
 	moviesInfo, err := s.movies.Latest(c.Request().Context(), limit, offset)
 	if err != nil {

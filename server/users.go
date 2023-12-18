@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (s *Server) signIn(c echo.Context) error {
+func (s *Server) signInPage(c echo.Context) error {
 	return components.Index(
 		components.Header(
 			getUsernameFromCtx(c),
@@ -26,7 +26,7 @@ func (s *Server) signInForm(c echo.Context) error {
 		Render(c.Request().Context(), c.Response().Writer)
 }
 
-func (s *Server) signUp(c echo.Context) error {
+func (s *Server) signUpPage(c echo.Context) error {
 	return components.Index(
 		components.Header(
 			getUsernameFromCtx(c),

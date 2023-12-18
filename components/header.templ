@@ -3,14 +3,14 @@ package components
 templ Header(username string) {
 	<div
  		id="header"
- 		class="navbar bg-base-100"
+ 		class="navbar mb-14"
 	>
 		<div class="flex-1">
 			@navBarTitle()
 		</div>
 		if username == "" {
-			<div class="flex-none">
-				<ul class="menu menu-horizontal px-1">
+			<div>
+				<ul class="menu menu-horizontal">
 					<li>
 						@navBarGetButton("Sign In", "/signInForm")
 					</li>
@@ -20,21 +20,17 @@ templ Header(username string) {
 				</ul>
 			</div>
 		} else {
-			<div class="flex-none">
-				<ul class="menu menu-horizontal px-1">
-					<li>
-						@profileDetails(username)
-					</li>
-				</ul>
-			</div>
+			@profileDetails(username)
 		}
 	</div>
 }
 
 templ profileDetails(username string) {
-	<details>
-		<summary>{ username } </summary>
-		<ul>
+	<div class="dropdown dropdown-bottom dropdown-end">
+		<div tabindex="0" role="button" class="text-base">
+			{ username }
+		</div>
+		<ul tabindex="0" class="dropdown-content menu bg-base-200 rounded-box w-36">
 			<li>
 				@navBarGetButton("My profile", "/users/profile")
 			</li>
@@ -42,7 +38,7 @@ templ profileDetails(username string) {
 				@signOutButton("/users/signOut")
 			</li>
 		</ul>
-	</details>
+	</div>
 }
 
 templ navBarTitle() {
@@ -62,6 +58,7 @@ templ navBarTitle() {
 
 templ navBarGetButton(label, endpoint string) {
 	<button
+ 		class="text-base"
  		hx-trigger="click"
  		hx-get={ endpoint }
  		hx-target="#content"
@@ -74,11 +71,12 @@ templ navBarGetButton(label, endpoint string) {
 
 templ signOutButton(endpoint string) {
 	<button
+ 		class="text-base"
  		hx-trigger="click"
  		hx-post={ endpoint }
  		hx-target="#header"
  		hx-indicator="#header-indicator"
- 		hx-swap="innerHTML"
+ 		hx-swap="outerHTML"
 	>
 		{ "Sign Out" }
 	</button>

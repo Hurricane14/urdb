@@ -2,7 +2,6 @@ package components
 
 templ SignIn() {
 	@signForm("/users/signIn") {
-		@ValidationList()
 		@signInput("email", "Email")
 		@signInput("password", "Password")
 		@submitButton("Sign In")
@@ -11,7 +10,6 @@ templ SignIn() {
 
 templ SignUp() {
 	@signForm("/users/signUp") {
-		@ValidationList()
 		@signInput("name", "Name")
 		@signInput("email", "Email")
 		@signInput("password", "Password")
@@ -24,7 +22,6 @@ templ signForm(endpoint string) {
 	<form
  		class={
 			"flex flex-col grid",
-			"justify-self-center",
 			"mx-20 my-4",
 		}
  		hx-post={ endpoint }
@@ -33,6 +30,7 @@ templ signForm(endpoint string) {
 		hx-trigger="submit"
 	>
 		<h1 class="text-center text-2xl my-2">URDB</h1>
+		@ValidationList()
 		{ children... }
 	</form>
 }

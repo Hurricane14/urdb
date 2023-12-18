@@ -3,7 +3,7 @@ package model
 import "errors"
 
 type User struct {
-	ID       uint64
+	ID
 	Name     string
 	Email    string
 	Password string

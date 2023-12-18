@@ -7,7 +7,8 @@ import (
 
 templ Movies(movies []model.MovieInfo) {
 	for _, movie := range movies {
-		@MovieInfo(movie)
+		@MovieCard(movie)
+		<div class="divider"></div>
 	}
 }
 
@@ -19,10 +20,16 @@ templ MoviesDiv(components ...templ.Component) {
 	</div>
 }
 
-templ MovieInfo(movie model.MovieInfo) {
+templ MovieCard(movie model.MovieInfo) {
 	<div class="card">
 		<div class="card-body">
-			<h2 class="card-title">
+			<h2
+ 				class="card-title"
+ 				hx-get={ fmt.Sprintf("/movie/%d/info", movie.ID) }
+ 				hx-trigger="click"
+ 				hx-indicator="#header-indicator"
+ 				hx-target="#content"
+			>
 				{ fmt.Sprintf("%s (%d)", movie.Title, movie.Year) }
 			</h2>
 			<p>{ movie.Brief }</p>
@@ -30,17 +37,11 @@ templ MovieInfo(movie model.MovieInfo) {
 				for _, genre := range movie.Genres {
 					<div class="badge badge-outline">{ genre }</div>
 				}
-				@ratingBadge(movie.Rating)
+				<div class={ "badge", ratingClass(movie.Rating) }>
+					{ fmt.Sprintf("%.1f*", movie.Rating) }
+				</div>
 			</div>
 		</div>
-	</div>
-}
-
-templ ratingBadge(rating float64) {
-	<div
- 		class={ "badge", ratingClass(rating) }
-	>
-		{ fmt.Sprintf("%.1f*", rating) }
 	</div>
 }
 
@@ -104,5 +105,47 @@ templ SearchBar() {
  			hx-disable-elt="this"
  			placeholder="Search..."
 		/>
+	</div>
+}
+
+templ Movie(movie model.Movie) {
+	<div class="card">
+		<h2
+ 			class="text-2xl font-bold"
+		>
+			{ fmt.Sprintf("%s (%d)", movie.Title, movie.Year) }
+			<span class="float-right">
+				{ fmt.Sprintf("%.1f ⭐", movie.Rating) }
+			</span>
+		</h2>
+		<p class="py-6">{ movie.Description }</p>
+		<table>
+			<colgroup>
+				<col class="w-1/6"/>
+				<col/>
+			</colgroup>
+			if movie.Director != nil {
+				<tr>
+					<td>Director:</td>
+					<td>{ movie.Director.Name }</td>
+				</tr>
+			}
+			if movie.Writer != nil {
+				<tr>
+					<td>Writer:</td>
+					<td>{ movie.Writer.Name }</td>
+				</tr>
+			}
+		</table>
+		<div class="card-actions justify-end">
+			for _, genre := range movie.Genres {
+				<div class="badge badge-outline text-lg">{ genre }</div>
+			}
+		</div>
+		<div class="divider"></div>
+		<div class="flex justify-center">
+			<button class="btn btn-accent w-1/4 mx-5">Crew</button>
+			<button class="btn btn-accent w-1/4 mx-5">Reviews</button>
+		</div>
 	</div>
 }

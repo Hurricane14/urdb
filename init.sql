@@ -18,10 +18,10 @@ CREATE TABLE IF NOT EXISTS movies (
 	added TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO movies(title, year, brief, added)
+INSERT INTO movies(id, title, year, brief, added)
 VALUES
-	('Inglourious Basterds', 2009, 'Kristoph Waltz is amazing', date('now', '-1 day')),
-	('Once Upon a Time in Holywood', 2019, 'So many actors!!', CURRENT_TIMESTAMP)
+	(1, 'Inglourious Basterds', 2009, 'Kristoph Waltz is amazing', date('now', '-1 day')),
+	(2, 'Once Upon a Time in Holywood', 2019, 'So many actors!!', CURRENT_TIMESTAMP)
 ;
 
 CREATE TABLE IF NOT EXISTS genres (
@@ -39,3 +39,45 @@ VALUES
 INSERT INTO genres (movie_id, genre)
 VALUES
 	( 2, 'Drama' );
+
+CREATE TABLE IF NOT EXISTS people (
+	id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	name TEXT NOT NULL,
+	birth_year INTEGER,
+	death_year INTEGER,
+	occupation TEXT NOT NULL
+);
+
+INSERT INTO people (id, name, occupation)
+VALUES
+	( 1, 'Quentin Tarantino', 'Director' )
+;
+
+CREATE TABLE IF NOT EXISTS movie_crew (
+	movie_id INTEGER NOT NULL,
+	person_id INTEGER NOT NULL,
+	role TEXT NOT NULL
+);
+
+INSERT INTO movie_crew (movie_id, person_id, role)
+VALUES
+	( 2, 1, 'director' ),
+	( 2, 1, 'writer' )
+;
+
+/*
+select
+	movies.id, movies.title,
+	directors.id as director_id, directors.name as director_name
+from movies
+left join
+    (select id, name from people) as directors
+    on directors.id == (
+        select person_id
+        from movie_crew
+        where movie_id = movies.id and role == 'director'
+    )
+where movies.id == 2
+;
+ */
+
