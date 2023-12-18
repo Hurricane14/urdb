@@ -5,11 +5,6 @@ import (
 	"fmt"
 )
 
-const (
-	moviesDivID     = "movies"
-	moviesDivTarget = "#movies"
-)
-
 templ Movies(movies []model.MovieInfo) {
 	for _, movie := range movies {
 		@MovieInfo(movie)
@@ -17,7 +12,7 @@ templ Movies(movies []model.MovieInfo) {
 }
 
 templ MoviesDiv(components ...templ.Component) {
-	<div id={ moviesDivID } class="grid grid-cols-1 p-3">
+	<div id="movies" class="grid grid-cols-1 p-3">
 		for _, component := range components {
 			@component
 		}
@@ -103,7 +98,7 @@ templ SearchBar() {
  			name="q"
  			hx-get="/searchMovies"
  			hx-trigger="keyup changed delay:500ms"
- 			hx-target={ moviesDivTarget }
+ 			hx-target="#movies"
  			hx-swap="outerHTML"
  			hx-indicator="#movies-loading-indicator"
  			hx-disable-elt="this"

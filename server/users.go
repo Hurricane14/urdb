@@ -1,11 +1,12 @@
 package server
 
 import (
+	"errors"
 	"net/http"
 	"time"
 	"urdb/components"
+	"urdb/model"
 
-	"github.com/gorilla/schema"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,6 +19,7 @@ func (s *Server) signIn(c echo.Context) error {
 
 func (s *Server) signInForm(c echo.Context) error {
 	time.Sleep(time.Second)
+	c.Response().Header().Set("HX-Push-Url", "/signUp")
 	return components.
 		SignIn().
 		Render(c.Request().Context(), c.Response().Writer)
@@ -32,16 +34,15 @@ func (s *Server) signUp(c echo.Context) error {
 
 func (s *Server) signUpForm(c echo.Context) error {
 	time.Sleep(time.Second)
+	c.Response().Header().Set("HX-Push-Url", "/signUp")
 	return components.
 		SignUp().
 		Render(c.Request().Context(), c.Response().Writer)
 }
 
-var decoder = schema.NewDecoder()
-
-type SignInForm struct {
-	Email    string `schema:"email"`
-	Password string `schema:"password"`
+type signInForm struct {
+	Email    string `schema:"email" validate:"required,email"`
+	Password string `schema:"password" validate:"required,password"`
 }
 
 func (s *Server) userSignIn(c echo.Context) error {
@@ -49,13 +50,80 @@ func (s *Server) userSignIn(c echo.Context) error {
 		return s.badRequest(c)
 	}
 
-	form := SignInForm{}
-	if err := decoder.Decode(&form, c.Request().PostForm); err != nil {
+	form := signInForm{}
+	if err := s.schema.Decode(&form, c.Request().PostForm); err != nil {
 		return s.badRequest(c)
 	}
 
-	s.router.Logger.Debugf("Received Sign In request: email: %q, password: %q", form.Email, form.Password)
-	c.Redirect(http.StatusMovedPermanently, "/")
+	s.router.Logger.Debug(form)
 
+	validationErrs := s.validateForm(form)
+	if len(validationErrs) != 0 {
+		return components.
+			ValidationList(validationErrs...).
+			Render(c.Request().Context(), c.Response().Writer)
+	}
+
+	user, err := s.users.ByEmail(c.Request().Context(), form.Email)
+	if err != nil && !errors.Is(err, model.ErrLoginMismatch) {
+		return s.internalError(c)
+	} else if errors.Is(err, model.ErrLoginMismatch) || user.Password != form.Password {
+		return components.
+			ValidationList(model.ErrLoginMismatch).
+			Render(c.Request().Context(), c.Response().Writer)
+	}
+
+	expireAt := time.Now().Add(s.cookieTTL)
+	token := s.tokens.Create(user.ID, expireAt)
+	c.SetCookie(&http.Cookie{
+		Name:     "URDB-Authorization",
+		Value:    token,
+		Expires:  expireAt,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	s.router.Logger.Debugf("Set cookie for user %s", user.Name)
+	c.Response().Header().Set("HX-Location", "/")
+	return nil
+}
+
+type signUpForm struct {
+	Name          string `schema:"name" validate:"min=4,max=16"`
+	Email         string `schema:"email" validate:"required,email"`
+	Password      string `schema:"password" validate:"required,password"`
+	PasswordAgain string `schema:"passwordAgain" validate:"required_with=Password|eqfield=Password"`
+}
+
+func (s *Server) userSignUp(c echo.Context) error {
+	if err := c.Request().ParseForm(); err != nil {
+		return s.badRequest(c)
+	}
+
+	form := signUpForm{}
+	if err := s.schema.Decode(&form, c.Request().PostForm); err != nil {
+		return s.badRequest(c)
+	}
+
+	s.router.Logger.Debug(form)
+
+	validationErrs := s.validateForm(form)
+	if len(validationErrs) != 0 {
+		return components.
+			ValidationList(validationErrs...).
+			Render(c.Request().Context(), c.Response().Writer)
+	}
+
+	_, err := s.users.ByEmail(c.Request().Context(), form.Email)
+	if err == nil {
+		return components.
+			ValidationList(model.ErrUserWithEmailExists).
+			Render(c.Request().Context(), c.Response().Writer)
+	} else if !errors.Is(err, model.ErrLoginMismatch) {
+		s.internalError(c)
+	}
+
+	c.Response().Header().Set("HX-Location", "/signIn")
 	return nil
 }

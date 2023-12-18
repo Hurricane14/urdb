@@ -44,8 +44,9 @@ func (r *moviesRepository) Latest(ctx context.Context, limit, offset int) (movie
 		FROM movies
 		ORDER BY added DESC
 		LIMIT ?
-		OFFSET ?
-	`, limit, offset)
+		OFFSET ?`,
+		limit, offset,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -80,8 +81,8 @@ func (r *moviesRepository) Search(ctx context.Context, query string) (movies []m
 		SELECT id, title, year, brief
 		FROM movies
 		WHERE lower(title) LIKE '%'||lower(?)||'%'
-		LIMIT 5
-	`, query)
+		LIMIT 5`, query,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -112,11 +113,11 @@ func (r *moviesRepository) Search(ctx context.Context, query string) (movies []m
 }
 
 func (r *moviesRepository) genres(ctx context.Context, movieID uint64) (genres []string, err error) {
-	rows, err := r.db.QueryContext(ctx, `
-		SELECT genre
+	rows, err := r.db.QueryContext(ctx,
+		`SELECT genre
 		FROM genres
-		WHERE movie_id = ?
-	`, movieID)
+		WHERE movie_id = ?`, movieID,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -142,24 +143,42 @@ func (r *moviesRepository) genres(ctx context.Context, movieID uint64) (genres [
 	return genres, nil
 }
 
-func (r *usersRepository) SignIn(ctx context.Context, email, password string) (user model.User, err error) {
+func (r *usersRepository) ByEmail(ctx context.Context, email string) (user model.User, err error) {
 	u := model.User{}
 	row := r.db.QueryRowContext(ctx,
-		`
-		SELECT id, name FROM users
-		WHERE email = ? AND password = ?
-		`,
-		email, password,
+		`SELECT id, name, password FROM users
+		WHERE email = ?`, email,
+	)
+	if err := row.Err(); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			err = model.ErrLoginMismatch
+		}
+
+		return model.User{}, err
+	}
+
+	if err := row.Scan(&u.ID, &u.Name, &u.Password); err != nil {
+		return model.User{}, err
+	}
+
+	u.Email = email
+	return u, nil
+}
+
+func (r *usersRepository) ByID(ctx context.Context, id uint64) (user model.User, err error) {
+	u := model.User{}
+	row := r.db.QueryRowContext(ctx,
+		`SELECT name, email, password FROM users
+		WHERE id = ? `, id,
 	)
 	if err := row.Err(); err != nil {
 		return model.User{}, err
 	}
 
-	if err := row.Scan(&u.ID, &u.Name); err != nil {
+	if err := row.Scan(&u.Name, &u.Email, &u.Password); err != nil {
 		return model.User{}, err
 	}
 
-	u.Email = email
-	u.Password = password
+	u.ID = id
 	return u, nil
 }

@@ -1,0 +1,68 @@
+package components
+
+templ SignIn() {
+	@signForm("/users/signIn") {
+		@ValidationList()
+		@signInput("email", "Email")
+		@signInput("password", "Password")
+		@submitButton("Sign In")
+	}
+}
+
+templ SignUp() {
+	@signForm("/users/signUp") {
+		@ValidationList()
+		@signInput("name", "Name")
+		@signInput("email", "Email")
+		@signInput("password", "Password")
+		@signInput("passwordAgain", "Password Again")
+		@submitButton("Sign Up")
+	}
+}
+
+templ signForm(endpoint string) {
+	<form
+ 		class={
+			"flex flex-col grid",
+			"justify-self-center",
+			"mx-20 my-4",
+		}
+ 		hx-post={ endpoint }
+ 		hx-target="#validation-list"
+ 		hx-swap="outerHTML"
+		hx-trigger="submit"
+	>
+		<h1 class="text-center text-2xl my-2">URDB</h1>
+		{ children... }
+	</form>
+}
+
+templ ValidationList(errors ...error) {
+	<ul id="validation-list" class="list-disc px-5 text-error">
+		for _, error := range errors {
+			<li>{ error.Error() } </li>
+		}
+	</ul>
+}
+
+templ signInput(name, placeholder string) {
+	<input
+ 		class="input input-bordered border-2 my-2"
+ 		name={ name }
+ 		placeholder={ placeholder }
+	/>
+}
+
+templ submitButton(name string) {
+	<button
+ 		class={
+			"btn btn-accent",
+			"rounded-badge",
+			"justify-self-center",
+			"w-content",
+			"my-1",
+		}
+	>
+		{ name }
+	</button>
+}

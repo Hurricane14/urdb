@@ -1,7 +1,5 @@
 package components
 
-import "strings"
-
 templ Header() {
 	<div
  		class="navbar bg-base-100"
@@ -22,47 +20,13 @@ templ Header() {
 	</div>
 }
 
-templ SignIn() {
-	@signForm("/users/signIn") {
-		<h1 class="text-center text-2xl my-2">Sign In to URDB</h1>
-		@signInput("email", "email", "Email")
-		@signInput("password", "password", "Password")
-		@submitButton("Sign In")
-	}
-}
-
-templ SignUp() {
-	@signForm("/users/signUp") {
-		<h1 class="text-center text-2xl my-2">Register for URDB</h1>
-		@signInput("name", "text", "Name")
-		@signInput("email", "email", "Email")
-		@signInput("password", "password", "Password")
-		@signInput("password", "password", "Password Again")
-		@submitButton("Sign Up")
-	}
-}
-
-templ signForm(endpoint string) {
-	<form
- 		class={
-			"flex flex-col grid",
-			"justify-self-center",
-			"mx-20 my-4",
-		}
-		method="post"
- 		action={ templ.SafeURL(endpoint) }
-	>
-		{ children... }
-	</form>
-}
-
 templ navBarTitle() {
 	<a
  		class="btn btn-ghost text-xl"
  		hx-trigger="click"
  		hx-get="/"
  		hx-target="body"
-		hx-indicator="#header-indicator"
+ 		hx-indicator="#header-indicator"
  		hx-push-url="/"
  		hx-swap="innerHTML"
 	>
@@ -71,44 +35,16 @@ templ navBarTitle() {
 	</a>
 }
 
-func toHistoryURL(url string) string {
-	return strings.TrimSuffix(url, "Form")
-}
-
-templ navBarButton(label, formURL string) {
+templ navBarButton(label, endpoint string) {
 	<button
  		hx-trigger="click"
- 		hx-get={ formURL }
+ 		hx-get={ endpoint }
  		hx-target="#content"
-		hx-indicator="#header-indicator"
- 		hx-push-url={ toHistoryURL(formURL) }
+ 		hx-indicator="#header-indicator"
  		hx-swap="innerHTML"
 	>
 		{ label }
 	</button>
-}
-
-templ submitButton(name string) {
-	<button
- 		class={
-			"btn btn-accent",
-			"rounded-badge",
-			"justify-self-center",
-			"w-content",
-			"my-1",
-		}
-	>
-		{ name }
-	</button>
-}
-
-templ signInput(name, _type, placeholder string) {
-	<input
- 		class="input input-bordered border-2 my-2"
- 		name={ name }
- 		placeholder={ placeholder }
- 		type={ _type }
-	/>
 }
 
 templ headerLoadingIndicator() {
