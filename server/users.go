@@ -10,35 +10,33 @@ import (
 )
 
 func (s *Server) signInPage(c echo.Context) error {
-	return components.Index(
+	page := components.Index(
 		components.Header(
 			getUsernameFromCtx(c),
 		),
 		components.SignIn(),
-	).Render(c.Request().Context(), c.Response().Writer)
+	)
+	return render(c, page)
 }
 
 func (s *Server) signInForm(c echo.Context) error {
 	c.Response().Header().Set("HX-Push-Url", "/signIn")
-	return components.
-		SignIn().
-		Render(c.Request().Context(), c.Response().Writer)
+	return render(c, components.SignIn())
 }
 
 func (s *Server) signUpPage(c echo.Context) error {
-	return components.Index(
+	page := components.Index(
 		components.Header(
 			getUsernameFromCtx(c),
 		),
 		components.SignUp(),
-	).Render(c.Request().Context(), c.Response().Writer)
+	)
+	return render(c, page)
 }
 
 func (s *Server) signUpForm(c echo.Context) error {
 	c.Response().Header().Set("HX-Push-Url", "/signUp")
-	return components.
-		SignUp().
-		Render(c.Request().Context(), c.Response().Writer)
+	return render(c, components.SignUp())
 }
 
 type signInForm struct {
@@ -56,18 +54,14 @@ func (s *Server) userSignIn(c echo.Context) error {
 
 	validationErrs := s.validateForm(form)
 	if len(validationErrs) != 0 {
-		return components.
-			ValidationList(validationErrs...).
-			Render(c.Request().Context(), c.Response().Writer)
+		return render(c, components.ValidationList(validationErrs...))
 	}
 
 	user, err := s.users.ByEmail(c.Request().Context(), form.Email)
 	if err != nil && !errors.Is(err, model.ErrUserNotExist) {
 		return s.internalError(c, err)
 	} else if errors.Is(err, model.ErrUserNotExist) || user.Password != form.Password {
-		return components.
-			ValidationList(model.ErrUserNotExist).
-			Render(c.Request().Context(), c.Response().Writer)
+		return render(c, components.ValidationList(model.ErrUserNotExist))
 	}
 
 	token := s.auth.CreateToken(user.ID, time.Now().Add(s.cookieTTL))
@@ -94,9 +88,7 @@ func (s *Server) userSignUp(c echo.Context) error {
 	s.router.Logger.Debug(form)
 	validationErrs := s.validateForm(form)
 	if len(validationErrs) != 0 {
-		return components.
-			ValidationList(validationErrs...).
-			Render(c.Request().Context(), c.Response().Writer)
+		return render(c, components.ValidationList(validationErrs...))
 	}
 
 	err := s.users.Create(c.Request().Context(), model.User{
@@ -105,9 +97,7 @@ func (s *Server) userSignUp(c echo.Context) error {
 		Password: form.Password,
 	})
 	if errors.Is(err, model.ErrUserExist) {
-		return components.
-			ValidationList(model.ErrUserExist).
-			Render(c.Request().Context(), c.Response().Writer)
+		return render(c, components.ValidationList(model.ErrUserExist))
 	} else if err != nil {
 		s.internalError(c, err)
 	}
@@ -118,5 +108,5 @@ func (s *Server) userSignUp(c echo.Context) error {
 
 func (s *Server) userSignOut(c echo.Context) error {
 	setTokenCookie(c, "", 0)
-	return components.Header("").Render(c.Request().Context(), c.Response().Writer)
+	return render(c, components.Header(""))
 }

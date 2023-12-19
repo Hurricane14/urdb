@@ -107,6 +107,5 @@ func (s *Server) indexPage(c echo.Context) error {
 		components.MoviesLoadingIndicator(),
 	)
 	page := components.Index(header, searchBar, movies)
-
-	return page.Render(c.Request().Context(), c.Response().Writer)
+	return render(c, page)
 }

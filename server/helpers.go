@@ -2,12 +2,16 @@ package server
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 	"urdb/model"
 
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
+
+func render(c echo.Context, component templ.Component) error {
+	return component.Render(c.Request().Context(), c.Response())
+}
 
 func more(movies []model.MovieInfo, limit uint64) bool {
 	return uint64(len(movies)) == limit
@@ -22,15 +26,6 @@ func (s *Server) internalError(c echo.Context, err error) error {
 func (s *Server) badRequest(c echo.Context) error {
 	c.Response().WriteHeader(http.StatusBadRequest)
 	return nil
-}
-
-func intQueryParamWithDefault(c echo.Context, name string, dflt int) int {
-	p := c.QueryParam(name)
-	if v, err := strconv.Atoi(p); err != nil {
-		return dflt
-	} else {
-		return v
-	}
 }
 
 func setTokenCookie(c echo.Context, token string, ttl time.Duration) {

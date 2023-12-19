@@ -27,12 +27,13 @@ func (s *Server) latestMovies(c echo.Context) error {
 	if err != nil {
 		return s.internalError(c, err)
 	}
-	if err := components.Movies(moviesInfo).Render(c.Request().Context(), c.Response().Writer); err != nil {
+	if err := render(c, components.Movies(moviesInfo)); err != nil {
 		return err
 	}
-	return components.More(
-		more(moviesInfo, q.Limit), q.Limit, q.Limit+q.Offset,
-	).Render(c.Request().Context(), c.Response().Writer)
+
+	return render(c, components.More(
+		more(moviesInfo, q.Limit), q.Limit, q.Limit+q.Offset),
+	)
 }
 
 type searchQuery struct {
@@ -50,10 +51,11 @@ func (s *Server) searchMovies(c echo.Context) error {
 		if err != nil {
 			return s.internalError(c, err)
 		}
-		return components.MoviesDiv(
+		movies := components.MoviesDiv(
 			components.Movies(moviesInfo),
 			components.MoviesLoadingIndicator(),
-		).Render(c.Request().Context(), c.Response().Writer)
+		)
+		return render(c, movies)
 	}
 
 	var limit, offset uint64 = defaultLimit, 0
@@ -66,7 +68,7 @@ func (s *Server) searchMovies(c echo.Context) error {
 		components.More(more(moviesInfo, limit), limit, limit+offset),
 		components.MoviesLoadingIndicator(),
 	)
-	return movies.Render(c.Request().Context(), c.Response().Writer)
+	return render(c, movies)
 }
 
 type moviePageQuery struct {
@@ -86,10 +88,11 @@ func (s *Server) moviePage(c echo.Context) error {
 		return s.internalError(c, err)
 	}
 
-	return components.Index(
+	page := components.Index(
 		components.Header(getUsernameFromCtx(c)),
 		components.Movie(movie),
-	).Render(c.Request().Context(), c.Response().Writer)
+	)
+	return render(c, page)
 }
 
 func (s *Server) movieInfo(c echo.Context) error {
@@ -106,6 +109,5 @@ func (s *Server) movieInfo(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("HX-Push-Url", fmt.Sprintf("/movie/%d", q.ID))
-	return components.Movie(movie).
-		Render(c.Request().Context(), c.Response().Writer)
+	return render(c, components.Movie(movie))
 }
