@@ -38,7 +38,7 @@ func initRepositories() error {
 	return nil
 }
 
-func (r *moviesRepository) Latest(ctx context.Context, limit, offset int) (movies []model.MovieInfo, err error) {
+func (r *moviesRepository) Latest(ctx context.Context, limit, offset uint64) (movies []model.MovieInfo, err error) {
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT id, title, year, brief
 		FROM movies

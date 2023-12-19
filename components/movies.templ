@@ -55,7 +55,7 @@ func ratingClass(rating float64) string {
 	}
 }
 
-templ More(more bool, limit, offset int) {
+templ More(more bool, limit, offset uint64) {
 	if !more {
 		<p class="text-center">That's all folks!</p>
 	} else {
@@ -63,7 +63,7 @@ templ More(more bool, limit, offset int) {
 	}
 }
 
-templ moreButton(limit, offset int) {
+templ moreButton(limit, offset uint64) {
 	<button
  		class={
 			"btn btn-accent",

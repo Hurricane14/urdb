@@ -6,42 +6,18 @@ import (
 	"net/http"
 	"time"
 	"urdb/components"
-	"urdb/model"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gorilla/schema"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 )
-
-const defaultLimit = 1
-
-type UsersRepository interface {
-	ByEmail(ctx context.Context, email string) (model.User, error)
-	ByID(ctx context.Context, id model.ID) (model.User, error)
-	Create(ctx context.Context, user model.User) error
-}
-
-type MoviesRepository interface {
-	Latest(ctx context.Context, limit, offset int) ([]model.MovieInfo, error)
-	Search(ctx context.Context, query string) ([]model.MovieInfo, error)
-	ByID(ctx context.Context, id model.ID) (model.Movie, error)
-}
-
-type AuthService interface {
-	CreateToken(id model.ID, expireAt time.Time) string
-	ParseToken(token string) (model.ID, error)
-	HashPassword(pass string) []byte
-	MatchPassword(got string, want []byte) bool
-}
 
 type Server struct {
 	router    *echo.Echo
 	users     UsersRepository
 	movies    MoviesRepository
 	auth      AuthService
-	schema    *schema.Decoder
 	validator *validator.Validate
 	cookieTTL time.Duration
 	delay     time.Duration
@@ -55,9 +31,6 @@ func New(
 	e := echo.New()
 	e.Logger.SetLevel(log.DEBUG)
 
-	decoder := schema.NewDecoder()
-	decoder.IgnoreUnknownKeys(true)
-
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	validate.RegisterValidation("password", validatePassword)
 
@@ -66,10 +39,9 @@ func New(
 		users:     users,
 		movies:    movies,
 		auth:      auth,
-		schema:    decoder,
 		validator: validate,
 		cookieTTL: 24 * time.Hour,
-		// delay:     750 * time.Millisecond,
+		delay:     750 * time.Millisecond,
 	}
 
 	e.Static("/static", "static")
@@ -126,6 +98,7 @@ func (s *Server) indexPage(c echo.Context) error {
 	if err != nil {
 		return s.internalError(c, err)
 	}
+
 	header := components.Header(getUsernameFromCtx(c))
 	searchBar := components.SearchBar()
 	movies := components.MoviesDiv(

@@ -9,8 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func more(movies []model.MovieInfo, limit int) bool {
-	return len(movies) == limit
+func more(movies []model.MovieInfo, limit uint64) bool {
+	return uint64(len(movies)) == limit
 }
 
 func (s *Server) internalError(c echo.Context, err error) error {

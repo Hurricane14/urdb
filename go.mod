@@ -3,7 +3,6 @@ module urdb
 go 1.21.4
 
 require (
-	github.com/gorilla/schema v1.2.1
 	github.com/labstack/echo/v4 v4.11.3
 )
 

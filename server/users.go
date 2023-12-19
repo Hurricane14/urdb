@@ -42,17 +42,13 @@ func (s *Server) signUpForm(c echo.Context) error {
 }
 
 type signInForm struct {
-	Email    string `schema:"email" validate:"required,email"`
-	Password string `schema:"password" validate:"required,password"`
+	Email    string `form:"email" validate:"required,email"`
+	Password string `form:"password" validate:"required,password"`
 }
 
 func (s *Server) userSignIn(c echo.Context) error {
-	if err := c.Request().ParseForm(); err != nil {
-		return s.badRequest(c)
-	}
-
 	form := signInForm{}
-	if err := s.schema.Decode(&form, c.Request().PostForm); err != nil {
+	if err := c.Bind(&form); err != nil {
 		return s.badRequest(c)
 	}
 
@@ -83,24 +79,19 @@ func (s *Server) userSignIn(c echo.Context) error {
 }
 
 type signUpForm struct {
-	Name          string `schema:"name" validate:"min=4,max=16"`
-	Email         string `schema:"email" validate:"required,email"`
-	Password      string `schema:"password" validate:"required,password"`
-	PasswordAgain string `schema:"passwordAgain" validate:"required_with=Password|eqfield=Password"`
+	Name          string `form:"name" validate:"min=4,max=16"`
+	Email         string `form:"email" validate:"required,email"`
+	Password      string `form:"password" validate:"required,password"`
+	PasswordAgain string `form:"passwordAgain" validate:"required_with=Password|eqfield=Password"`
 }
 
 func (s *Server) userSignUp(c echo.Context) error {
-	if err := c.Request().ParseForm(); err != nil {
-		return s.badRequest(c)
-	}
-
 	form := signUpForm{}
-	if err := s.schema.Decode(&form, c.Request().PostForm); err != nil {
+	if err := c.Bind(&form); err != nil {
 		return s.badRequest(c)
 	}
 
 	s.router.Logger.Debug(form)
-
 	validationErrs := s.validateForm(form)
 	if len(validationErrs) != 0 {
 		return components.
@@ -117,7 +108,7 @@ func (s *Server) userSignUp(c echo.Context) error {
 		return components.
 			ValidationList(model.ErrUserExist).
 			Render(c.Request().Context(), c.Response().Writer)
-	} else if !errors.Is(err, model.ErrUserNotExist) {
+	} else if err != nil {
 		s.internalError(c, err)
 	}
 
