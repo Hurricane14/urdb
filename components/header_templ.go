@@ -135,7 +135,7 @@ func navBarTitle() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a class=\"btn btn-ghost text-xl\" hx-trigger=\"click\" hx-get=\"/\" hx-target=\"body\" hx-indicator=\"#header-indicator\" hx-push-url=\"/\" hx-swap=\"innerHTML\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a class=\"btn btn-ghost text-xl\" hx-trigger=\"click\" hx-get=\"/\" hx-target=\"body\" hx-indicator=\"#header-indicator\" hx-push-url=\"/\" hx-swap=\"innerHTML\"><img class=\"h-8 pb-1\" src=\"/static/logo.png\"> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
