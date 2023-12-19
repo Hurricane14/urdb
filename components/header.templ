@@ -28,7 +28,7 @@ templ Header(username string) {
 templ profileDetails(username string) {
 	<div class="dropdown dropdown-bottom dropdown-end">
 		<div tabindex="0" role="button" class="text-base">
-			{ username }
+			{ "▼ " + username }
 		</div>
 		<ul tabindex="0" class="dropdown-content menu bg-base-200 rounded-box w-36">
 			<li>
