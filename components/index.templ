@@ -1,5 +1,7 @@
 package components
 
+const ContentDivID = "content"
+
 templ Index(header templ.Component, contents ...templ.Component) {
 	<html>
 		<head>
@@ -20,7 +22,7 @@ templ Index(header templ.Component, contents ...templ.Component) {
 			</style>
 			<div class="w-3/5 py-20">
 				@header
-				<div id="content">
+				<div id={ContentDivID}>
 					for _, component := range contents {
 						@component
 					}

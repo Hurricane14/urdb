@@ -1,7 +1,8 @@
-package components
+package movies
 
 import (
 	"urdb/model"
+	"urdb/components"
 	"fmt"
 )
 
@@ -28,7 +29,7 @@ templ MovieCard(movie model.MovieInfo) {
  				hx-get={ fmt.Sprintf("/movie/%d/info", movie.ID) }
  				hx-trigger="click"
  				hx-indicator="#header-indicator"
- 				hx-target="#content"
+ 				hx-target={"#" + components.ContentDivID}
 			>
 				<a>{ fmt.Sprintf("%s (%d)", movie.Title, movie.Year) }</a>
 			</h2>

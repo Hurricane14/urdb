@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 	"urdb/components"
+	"urdb/components/header"
+	"urdb/components/movies"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -99,12 +101,12 @@ func (s *Server) indexPage(c echo.Context) error {
 		return s.internalError(c, err)
 	}
 
-	header := components.Header(getUsernameFromCtx(c))
-	searchBar := components.SearchBar()
-	movies := components.MoviesDiv(
-		components.Movies(moviesInfo),
-		components.More(len(moviesInfo) == limit, limit, limit+offset),
-		components.MoviesLoadingIndicator(),
+	header := header.Header(getUsernameFromCtx(c))
+	searchBar := movies.SearchBar()
+	movies := movies.MoviesDiv(
+		movies.Movies(moviesInfo),
+		movies.More(len(moviesInfo) == limit, limit, limit+offset),
+		movies.MoviesLoadingIndicator(),
 	)
 	page := components.Index(header, searchBar, movies)
 	return render(c, page)

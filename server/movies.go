@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"urdb/components"
+	"urdb/components/header"
+	"urdb/components/movies"
 	"urdb/model"
 
 	"github.com/labstack/echo/v4"
@@ -27,11 +29,11 @@ func (s *Server) latestMovies(c echo.Context) error {
 	if err != nil {
 		return s.internalError(c, err)
 	}
-	if err := render(c, components.Movies(moviesInfo)); err != nil {
+	if err := render(c, movies.Movies(moviesInfo)); err != nil {
 		return err
 	}
 
-	return render(c, components.More(
+	return render(c, movies.More(
 		more(moviesInfo, q.Limit), q.Limit, q.Limit+q.Offset),
 	)
 }
@@ -51,9 +53,9 @@ func (s *Server) searchMovies(c echo.Context) error {
 		if err != nil {
 			return s.internalError(c, err)
 		}
-		movies := components.MoviesDiv(
-			components.Movies(moviesInfo),
-			components.MoviesLoadingIndicator(),
+		movies := movies.MoviesDiv(
+			movies.Movies(moviesInfo),
+			movies.MoviesLoadingIndicator(),
 		)
 		return render(c, movies)
 	}
@@ -63,10 +65,10 @@ func (s *Server) searchMovies(c echo.Context) error {
 	if err != nil {
 		return s.internalError(c, err)
 	}
-	movies := components.MoviesDiv(
-		components.Movies(moviesInfo),
-		components.More(more(moviesInfo, limit), limit, limit+offset),
-		components.MoviesLoadingIndicator(),
+	movies := movies.MoviesDiv(
+		movies.Movies(moviesInfo),
+		movies.More(more(moviesInfo, limit), limit, limit+offset),
+		movies.MoviesLoadingIndicator(),
 	)
 	return render(c, movies)
 }
@@ -89,8 +91,8 @@ func (s *Server) moviePage(c echo.Context) error {
 	}
 
 	page := components.Index(
-		components.Header(getUsernameFromCtx(c)),
-		components.Movie(movie),
+		header.Header(getUsernameFromCtx(c)),
+		movies.Movie(movie),
 	)
 	return render(c, page)
 }
@@ -109,5 +111,5 @@ func (s *Server) movieInfo(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("HX-Push-Url", fmt.Sprintf("/movie/%d", q.ID))
-	return render(c, components.Movie(movie))
+	return render(c, movies.Movie(movie))
 }

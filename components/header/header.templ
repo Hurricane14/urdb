@@ -1,4 +1,6 @@
-package components
+package header
+
+const HeaderIndicatorID = "header-indicator"
 
 templ Header(username string) {
 	<div
@@ -47,7 +49,7 @@ templ navBarTitle() {
  		hx-trigger="click"
  		hx-get="/"
  		hx-target="body"
- 		hx-indicator="#header-indicator"
+ 		hx-indicator={"#" + HeaderIndicatorID}
  		hx-push-url="/"
  		hx-swap="innerHTML"
 	>
@@ -63,7 +65,7 @@ templ navBarGetButton(label, endpoint string) {
  		hx-trigger="click"
  		hx-get={ endpoint }
  		hx-target="#content"
- 		hx-indicator="#header-indicator"
+ 		hx-indicator={"#" + HeaderIndicatorID}
  		hx-swap="innerHTML"
 	>
 		{ label }
@@ -76,7 +78,7 @@ templ signOutButton(endpoint string) {
  		hx-trigger="click"
  		hx-post={ endpoint }
  		hx-target="#header"
- 		hx-indicator="#header-indicator"
+ 		hx-indicator={"#" + HeaderIndicatorID}
  		hx-swap="outerHTML"
 	>
 		{ "Sign Out" }
@@ -84,7 +86,7 @@ templ signOutButton(endpoint string) {
 }
 
 templ headerLoadingIndicator() {
-	<div id="header-indicator" class="htmx-indicator justify-self-center">
+	<div id={HeaderIndicatorID} class="htmx-indicator justify-self-center">
 		<span class="loading loading-infinity loading-lg"></span>
 	</div>
 }
