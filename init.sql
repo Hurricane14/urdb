@@ -18,10 +18,20 @@ CREATE TABLE IF NOT EXISTS movies (
 	added TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO movies(id, title, year, brief, added)
+INSERT INTO movies(id, title, year, brief, description, added)
 VALUES
-	(1, 'Inglourious Basterds', 2009, 'Kristoph Waltz is amazing', date('now', '-1 day')),
-	(2, 'Once Upon a Time in Holywood', 2019, 'So many actors!!', CURRENT_TIMESTAMP)
+	(
+		1, 'Inglourious Basterds', 2009,
+		'Kristoph Waltz is amazing',
+		"In Nazi-occupied France during World War II, a plan to assassinate Nazi leaders by a group of Jewish U.S. soldiers coincides with a theatre owner's vengeful plans for the same.",
+		date('now', '-1 day')
+	),
+	(
+		2, 'Once Upon a Time in Holywood', 2019,
+		'So many actors!!',
+		"A faded television actor and his stunt double strive to achieve fame and success in the final years of Hollywood's Golden Age in 1969 Los Angeles.",
+		CURRENT_TIMESTAMP
+	)
 ;
 
 CREATE TABLE IF NOT EXISTS genres (
@@ -50,19 +60,21 @@ CREATE TABLE IF NOT EXISTS people (
 
 INSERT INTO people (id, name, occupation)
 VALUES
-	( 1, 'Quentin Tarantino', 'Director' )
+	( 1, 'Quentin Tarantino', 'Director' ),
+	( 2, 'Margot Robbie', 'Actor' )
 ;
 
-CREATE TABLE IF NOT EXISTS movie_crew (
+CREATE TABLE IF NOT EXISTS crew (
 	movie_id INTEGER NOT NULL,
 	person_id INTEGER NOT NULL,
 	role TEXT NOT NULL
 );
 
-INSERT INTO movie_crew (movie_id, person_id, role)
+INSERT INTO crew (movie_id, person_id, role)
 VALUES
 	( 2, 1, 'director' ),
-	( 2, 1, 'writer' )
+	( 2, 1, 'writer' ),
+	( 2, 2, 'actor' )
 ;
 
 /*

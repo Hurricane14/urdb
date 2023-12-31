@@ -71,7 +71,8 @@ func New(
 	usersAPI.POST("/signUp", s.userSignUp)
 	usersAPI.POST("/signOut", s.userSignOut, s.requireAuthorization)
 
-	e.GET("/movie/:id/info", s.movieInfo)
+	e.GET("/movie/:id/crew", s.crew)
+	e.GET("/movie/:id/info", s.movie)
 	e.GET("/movie/:id", s.moviePage)
 	e.GET("/searchMovies", s.searchMovies)
 	e.GET("/latestMovies", s.latestMovies)

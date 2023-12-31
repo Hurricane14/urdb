@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 	"urdb/model"
 
 	"github.com/mattn/go-sqlite3"
@@ -117,24 +118,8 @@ func (r *moviesRepository) ByID(ctx context.Context, id model.ID) (m model.Movie
 		SELECT
 			movies.id, movies.title,
 			movies.year, movies.brief,
-			movies.description,
-			IFNULL(directors.id, 0) as director_id, IFNULL(directors.name, '') as director_name,
-			IFNULL(writers.id, 0) as writer_id, IFNULL(writers.name, '') as writer_name
+			movies.description
 		FROM movies
-		LEFT JOIN
-		    (SELECT id, name from people) as directors
-		    on directors.id == (
-			select person_id
-			from movie_crew
-			where movie_id = movies.id and role == 'director'
-		    )
-		LEFT JOIN
-		    (SELECT id, name from people) as writers
-		    on writers.id == (
-			select person_id
-			from movie_crew
-			where movie_id = movies.id and role == 'writer'
-		    )
 		where movies.id == ?`, id,
 	)
 	err = row.Err()
@@ -144,12 +129,9 @@ func (r *moviesRepository) ByID(ctx context.Context, id model.ID) (m model.Movie
 		return model.Movie{}, err
 	}
 
-	director := &model.CrewMember{Role: model.Director}
-	writer := &model.CrewMember{Role: model.Writer}
 	if err := row.Scan(
 		&m.ID, &m.Title,
 		&m.Year, &m.Brief, &m.Description,
-		&director.ID, &director.Name, &writer.ID, &writer.Name,
 	); err != nil {
 		return model.Movie{}, err
 	}
@@ -158,14 +140,7 @@ func (r *moviesRepository) ByID(ctx context.Context, id model.ID) (m model.Movie
 	if err != nil {
 		return model.Movie{}, err
 	}
-
 	m.Genres = genres
-	if writer.Name != "" {
-		m.Writer = writer
-	}
-	if director.Name != "" {
-		m.Director = director
-	}
 
 	return m, nil
 }
@@ -202,6 +177,42 @@ func (r *moviesRepository) genres(ctx context.Context, movie model.ID) (genres [
 	}
 
 	return genres, nil
+}
+
+func (r *moviesRepository) Crew(ctx context.Context, movie model.ID) (crew []model.CrewMember, err error) {
+	rows, err := r.db.QueryContext(ctx,
+		`SELECT person_id, people.name, group_concat(role) AS roles FROM crew
+		INNER JOIN people ON people.id = crew.person_id
+		WHERE movie_id = ? 
+		GROUP BY person_id
+		`, movie,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err = errors.Join(err, rows.Close())
+		if err != nil {
+			crew = nil
+		}
+	}()
+
+	for rows.Next() {
+		var roles string
+		var member model.CrewMember
+		if err := rows.Scan(&member.ID, &member.Name, &roles); err != nil {
+			return nil, err
+		}
+
+		member.Roles = strings.Split(roles, ",")
+		crew = append(crew, member)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return crew, nil
 }
 
 func (r *usersRepository) ByEmail(ctx context.Context, email string) (user model.User, err error) {

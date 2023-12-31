@@ -23,6 +23,7 @@ type MoviesRepository interface {
 	Latest(ctx context.Context, limit, offset uint64) ([]model.MovieInfo, error)
 	Search(ctx context.Context, query string) ([]model.MovieInfo, error)
 	ByID(ctx context.Context, id model.ID) (model.Movie, error)
+	Crew(ctx context.Context, id model.ID) ([]model.CrewMember, error)
 }
 
 type AuthService interface {

@@ -4,8 +4,6 @@ import "errors"
 
 type Movie struct {
 	MovieInfo
-	Director    *CrewMember
-	Writer      *CrewMember
 	Description string
 }
 

@@ -1,13 +1,7 @@
 package server
 
 import (
-	"errors"
-	"fmt"
-	"net/http"
-	"urdb/components"
-	"urdb/components/header"
 	"urdb/components/movies"
-	"urdb/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -71,45 +65,4 @@ func (s *Server) searchMovies(c echo.Context) error {
 		movies.MoviesLoadingIndicator(),
 	)
 	return render(c, movies)
-}
-
-type moviePageQuery struct {
-	ID model.ID `param:"id"`
-}
-
-func (s *Server) moviePage(c echo.Context) error {
-	q := moviePageQuery{}
-	if err := c.Bind(&q); err != nil {
-		return s.badRequest(c)
-	}
-
-	movie, err := s.movies.ByID(c.Request().Context(), q.ID)
-	if errors.Is(err, model.ErrMovieNotExist) {
-		return c.String(http.StatusNotFound, "Not Found")
-	} else if err != nil {
-		return s.internalError(c, err)
-	}
-
-	page := components.Index(
-		header.Header(getUsernameFromCtx(c)),
-		movies.Movie(movie),
-	)
-	return render(c, page)
-}
-
-func (s *Server) movieInfo(c echo.Context) error {
-	q := moviePageQuery{}
-	if err := c.Bind(&q); err != nil {
-		return s.badRequest(c)
-	}
-
-	movie, err := s.movies.ByID(c.Request().Context(), q.ID)
-	if errors.Is(err, model.ErrMovieNotExist) {
-		return c.String(http.StatusNotFound, "Not Found")
-	} else if err != nil {
-		return s.internalError(c, err)
-	}
-
-	c.Response().Header().Set("HX-Push-Url", fmt.Sprintf("/movie/%d", q.ID))
-	return render(c, movies.Movie(movie))
 }

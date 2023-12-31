@@ -1,0 +1,75 @@
+package movie
+
+import (
+	"fmt"
+	"urdb/model"
+	"urdb/components/header"
+	"strings"
+)
+
+var infos = [...]string{"crew", "reviews"}
+
+templ Movie(movie model.Movie, info templ.Component) {
+	<div class="card">
+		<h2
+ 			class="text-2xl font-bold"
+		>
+			{ fmt.Sprintf("%s (%d)", movie.Title, movie.Year) }
+			<span class="float-right">
+				{ fmt.Sprintf("%.1f ⭐", movie.Rating) }
+			</span>
+		</h2>
+		<p class="py-6">{ movie.Description }</p>
+		<div class="card-actions justify-end">
+			for _, genre := range movie.Genres {
+				<div class="badge badge-outline text-lg">{ genre }</div>
+			}
+		</div>
+		<div class="divider"></div>
+		<div
+ 			class={ "flex justify-center", }
+		>
+			for _, info := range infos {
+				<button
+ 					class={
+						"btn btn-accent",
+						"w-1/4 mx-5",
+					}
+ 					hx-get={ fmt.Sprintf("/movie/%d/%s", movie.ID, info) }
+ 					hx-target="#movieInfo"
+ 					hx-swap="outerHTML"
+ 					hx-indicator={ "#" + header.HeaderIndicatorID }
+				>
+					{ strings.Title(info) }
+				</button>
+			}
+		</div>
+		@info
+	</div>
+}
+
+templ movieInfo() {
+	<div id="movieInfo" class="py-3 px-4">
+		{ children... }
+	</div>
+}
+
+templ Crew(crew []model.CrewMember) {
+	@movieInfo() {
+		for _, member := range crew {
+			<p class="text-xl font-bold float-left w-full py-2">
+				{ member.Name }
+				<span class="float-right text-base">
+					{ strings.Join(ToTitle(member.Roles), " ") }
+				</span>
+			</p>
+		}
+	}
+}
+
+func ToTitle(s []string) []string {
+	for i, str := range s {
+		s[i] = strings.Title(str)
+	}
+	return s
+}

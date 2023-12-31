@@ -2,36 +2,10 @@ package model
 
 import "errors"
 
-type Role uint16
-
-const (
-	Unknown Role = iota
-	Director
-	Writer
-	Actor
-)
-
-func (r Role) String() string {
-	var s string
-	switch r {
-	case Unknown:
-		s = "Unknown"
-	case Director:
-		s = "Director"
-	case Writer:
-		s = "Writer"
-	case Actor:
-		s = "Actor"
-	default:
-		panic("Unexpected role value")
-	}
-	return s
-}
-
 type CrewMember struct {
 	ID
-	Name string
-	Role Role
+	Name  string
+	Roles []string
 }
 
 type Person struct {
